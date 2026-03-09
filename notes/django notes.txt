@@ -56,6 +56,7 @@ settings->installed app->write 'appname',
 
 if u create any view then default argu in def is request in para
 and should 
+render-temporary deploy
 return render(request,'file name')
 
 in app folder create templates and only html files are allowed in templates
@@ -169,24 +170,125 @@ remove index from every file and add / behind every html file name
 
 
 
+=============login logout session====================
+
+login
+singup
+index
+
+
+in views
+em=request.POST['email']        em=variable     
+pa=
+
+user=usersignup.objects.filter(email=em,password=pa)
+
+filter=method
+
+
+====================session============================
+
+data gets store in cookie and it passes it every page so we dont have to sign in everytime
+
+session gets store in cookie
+
+in mobile cache data
+
+session is also for tracking data
+
+every apps and web have diff session time
 
 
 
 
 
+should write before return redirect
+request.session["user"]=em       for generating session       key is email and value is em so its written in dictionary 
+
+we can take any key for taking session here we have take email
+in django default session time is 15days
+
+
+website base 64 for decoding session data
+
+request.session.get("user")
+
+return render(.....{"user":user})
 
 
 
 
+=================orm================
 
+object relational mapper
 
+It is a tool that allows Python code to interact with a database without writing SQL queries.
 
+| -----------------------| -----------------------|
+| SQL    		| Django ORM  	|
+| -----------------------| -----------------------|
+| SELECT 		| filter()   		|
+| INSERT 		| create()   	|
+| UPDATE 	| save()     		|
+| DELETE 	| delete()   	|
 
+--------------------------------------------
+sql---select
+SELECT * FROM users WHERE username='harsh';
 
+in python orm---
+User.objects.filter(username='harsh')
 
+---------------------------------------------
 
+sql---insert
+INSERT INTO auth_user (username,email)
+VALUES ('harsh','h@gmail.com');
 
+python---
+User.objects.create(username='harsh', email='h@gmail.com')
 
+---------------------------------------------
+
+sql---update
+UPDATE students
+SET age = 23
+WHERE id = 1;
+
+python---
+in model.py
+class Student(models.Model):
+    name = models.CharField(max_length=100)
+    age = models.IntegerField()
+
+in view
+student = Student.objects.get(id=1)
+student.age = 23
+student.save()
+
+--------------------------------------------------------------
+
+sql---delete
+DELETE FROM students
+WHERE id = 2;
+
+python---
+student = Student.objects.get(id=2)
+student.delete()
+
+---------------------------------------------------------------
+
+You can update directly without loading object.
+
+sql---
+UPDATE student
+SET age = 24
+WHERE id = 1;
+
+python---
+Student.objects.filter(id=1).update(age=24)
+
+------------------------------------------------------------------
 
 
 
