@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'Q4',
     'Q6',
     'Q7',
+    'Q8',
 ]
 
 MIDDLEWARE = [
