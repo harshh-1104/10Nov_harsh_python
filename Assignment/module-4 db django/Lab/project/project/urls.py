@@ -33,5 +33,6 @@ urlpatterns = [
     path('q10/', include('Q10.urls')),
     path('q11/', include('Q11.urls')),
     path('q12/', include('Q12.urls')),
+    path('q13/', include('Q13.urls')),
     path('admin/', admin.site.urls),
 ]
