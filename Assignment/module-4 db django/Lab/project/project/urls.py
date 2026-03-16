@@ -19,9 +19,11 @@ from django.urls import path
 
 from Q1 import views as q1_views
 from Q2 import views as q2_views
+from Q3 import views as q3_views
 
 urlpatterns = [
     path('', q1_views.home, name='home'),
     path('q2/', q2_views.home, name='q2_home'),
+    path('q3/', q3_views.home, name='q3_home'),
     path('admin/', admin.site.urls),
 ]

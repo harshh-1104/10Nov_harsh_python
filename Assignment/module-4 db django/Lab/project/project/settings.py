@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'Q1',
     'Q2',
+    'Q3',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{% static 'Q2/style.css' %}" />
+</head>
+<body>
+  <main>
+    <h1>JS Form Validation</h1>
+
+    <form id="contactForm" method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="field">
+        <label for="id_name">Name</label>
+        <input id="id_name" name="name" type="text" required />
+        <p class="error" aria-live="polite"></p>
+      </div>
+
+      <div class="field">
+        <label for="id_email">Email</label>
+        <input id="id_email" name="email" type="email" required />
+        <p class="error" aria-live="polite"></p>
+      </div>
+
+      <div class="field">
+        <label for="id_message">Message</label>
+        <textarea id="id_message" name="message" rows="4" required></textarea>
+        <p class="error" aria-live="polite"></p>
+      </div>
+
+      <button type="submit">Submit</button>
+      <p class="success" role="status" aria-live="polite"></p>
+    </form>
+  </main>
+
+  <script src="{% static 'Q3/form-validation.js' %}"></script>
+</body>
+</html>
