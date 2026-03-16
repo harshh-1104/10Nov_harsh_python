@@ -28,5 +28,6 @@ urlpatterns = [
     path('q3/', q3_views.home, name='q3_home'),
     path('q4/', q4_views.home, name='q4_home'),
     path('q6/', include('Q6.urls')),
+    path('q7/', include('Q7.urls')),
     path('admin/', admin.site.urls),
 ]

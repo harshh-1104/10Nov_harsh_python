@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 2rem; background: #f9fafb; color: #111827; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; background: #ffffff; border-radius: 1rem; box-shadow: 0 14px 28px rgba(11, 18, 39, 0.1); }
+        h1 { margin-top: 0; color: #1f2937; }
+        .message { border: 1px solid #e5e7eb; padding: 1rem; margin: 1rem 0; border-radius: 0.5rem; background: #f9fafb; }
+        .author { font-weight: bold; color: #3b82f6; }
+        .timestamp { font-size: 0.875rem; color: #6b7280; }
+        a { color: #3b82f6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ title }}</h1>
+        <p>This app demonstrates Django's MVT architecture:</p>
+        <ul>
+            <li><strong>Model (M)</strong>: Defines data structure (Message model)</li>
+            <li><strong>View (V)</strong>: Handles request logic and data retrieval</li>
+            <li><strong>Template (T)</strong>: Renders the HTML presentation</li>
+        </ul>
+        <a href="{% url 'q7_create' %}">Add a Message</a>
+        <h2>Messages</h2>
+        {% for message in messages %}
+        <div class="message">
+            <p>{{ message.text }}</p>
+            <p class="author">By {{ message.author }}</p>
+            <p class="timestamp">{{ message.created_at }}</p>
+        </div>
+        {% empty %}
+        <p>No messages yet. <a href="{% url 'q7_create' %}">Add the first one!</a></p>
+        {% endfor %}
+    </div>
+</body>
+</html>

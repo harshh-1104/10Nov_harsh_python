@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Message</title>
+    <style>
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 2rem; background: #f9fafb; color: #111827; }
+        .container { max-width: 600px; margin: 0 auto; padding: 2rem; background: #ffffff; border-radius: 1rem; box-shadow: 0 14px 28px rgba(11, 18, 39, 0.1); }
+        h1 { margin-top: 0; color: #1f2937; }
+        form { display: flex; flex-direction: column; }
+        label { margin-top: 1rem; font-weight: bold; }
+        input, textarea { padding: 0.5rem; margin-top: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; }
+        button { margin-top: 1rem; padding: 0.75rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; }
+        button:hover { background: #2563eb; }
+        a { margin-top: 1rem; color: #3b82f6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add a Message</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save Message</button>
+        </form>
+        <a href="{% url 'q7_home' %}">Back to Messages</a>
+    </div>
+</body>
+</html>
