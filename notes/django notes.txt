@@ -298,7 +298,7 @@ up until now we have worked with sqlite now its time for mysql xampp
 
 for that first follow simple step till u create apps and dont migrate
 
-then start ur xampp and create database same name as project folder name
+then start ur xampp and create database 
 
 then go to settings and go to database section and then go to given link and copy 
 
@@ -318,7 +318,7 @@ this part
 and replace the part of database in setting.py 
 
 then remove postgresql and write mysql
-in name write the name of ur project name which is same as xampp database
+in name write the name of xampp database
 write root in user
 password - blank
 in host u can keep same or write localhost
@@ -328,6 +328,14 @@ then apply cmnd migrate and refresh xampp browser and u will see all 10 tables i
 
 
 
+
+
+
+===========for otp email===========
+
+start with setting conf
+
+6 attributes
 
 
 
