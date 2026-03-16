@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Registration</title>
+  <link rel="stylesheet" href="{% static 'Q2/style.css' %}" />
+</head>
+<body>
+  <main>
+    <h1>User Registration</h1>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form id="registrationForm" method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="field">
+        <label for="id_username">Username</label>
+        <input id="id_username" name="username" type="text" required />
+        <p class="error" aria-live="polite"></p>
+      </div>
+
+      <div class="field">
+        <label for="id_email">Email</label>
+        <input id="id_email" name="email" type="email" required />
+        <p class="error" aria-live="polite"></p>
+      </div>
+
+      <div class="field">
+        <label for="id_password">Password</label>
+        <input id="id_password" name="password" type="password" required />
+        <p class="error" aria-live="polite"></p>
+      </div>
+
+      <div class="field">
+        <label for="id_confirm_password">Confirm Password</label>
+        <input id="id_confirm_password" name="confirm_password" type="password" required />
+        <p class="error" aria-live="polite"></p>
+      </div>
+
+      <button type="submit">Register</button>
+    </form>
+  </main>
+
+  <script src="{% static 'Q10/registration-validation.js' %}"></script>
+</body>
+</html>
