@@ -1,0 +1,20 @@
+Q5)Write a Python program to create and activate a virtual environment, 
+then install Django in it.
+
+
+first install virtualenv in your system
+
+so first in your terminal write following steps
+
+1)pip install virtualenv
+
+2)virtualenv [environment name]
+    ex- virtualenv myenv
+
+3)myenv\Scripts\Activate
+
+4)pip install django==version
+
+5)django-admin startproject projectname
+
+6)cd projectname
