@@ -1,0 +1,41 @@
+{% extends 'Q12/base.html' %}
+
+{% block content %}
+<div class="card p-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h2 class="fw-bold text-dark">Doctor Profiles</h2>
+        <a href="{% url 'doctor_add' %}" class="btn btn-primary shadow-sm">+ Add New Doctor</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="bg-light">
+                <tr>
+                    <th class="border-0">Name</th>
+                    <th class="border-0">Specialization</th>
+                    <th class="border-0">Contact</th>
+                    <th class="border-0">Email</th>
+                    <th class="border-0 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doctor in doctors %}
+                <tr>
+                    <td class="fw-semibold">{{ doctor.name }}</td>
+                    <td><span class="badge bg-info text-dark">{{ doctor.specialization }}</span></td>
+                    <td>{{ doctor.contact_number }}</td>
+                    <td>{{ doctor.email }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'doctor_edit' doctor.pk %}" class="btn btn-sm btn-outline-warning me-2">Edit</a>
+                        <a href="{% url 'doctor_delete' doctor.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">No doctor profiles found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

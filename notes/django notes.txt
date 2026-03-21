@@ -339,18 +339,106 @@ start with setting conf
 
 
 
+=================for social auth=================
+
+
+pip install django-allauth    
+        
+
+developer consol google
+
+
+pip install pyjwt
+
+django==4.2.16
+
+
+js url-> localhost url
+auth url->google/login/callback
+
+
+
+social app provider
+client id & secret key
+
+sites->
+locahost url to other table filter smthing
+
+
+
+in setting
+debug=false
+allowed host=['*']
 
 
 
 
+pip freeze > "requirement.txt"
+
+
+studygyaan.com->for hosting tuto in google
+
+
+for installing requiremented library
+pip install -r requirements.txt
+
+python manage.py collectstatic
+
+
+select web frame
+manual wadu option select 
+
+
+source and working directory same path
+/home/...
+
+in env
+/home/....env
 
 
 
+remove wsgi code and paste studygyaan wsgi
+and edit mysite.setting to your prjkt name which is in wsgi in your file
+also change path on line 6
+
+
+for live mysql
 
 
 
+ci3
+continous integration
+cd
+conti dev
 
 
+
+pythonanywhere ma google signin
+
+java url ma python wadi akhi url
+redirect url ma ...login/callback
+
+
+
+admin ma client id and secret key change
+static root in settings
+
+
+
+=============template inh====================
+
+{% block navbar %}
+....
+{% endblock %}
+
+
+
+{% extends 'base.html %}
+
+
+
+---webpage title---
+{% block title %} value {% endblock %}
 
 
 

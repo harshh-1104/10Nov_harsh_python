@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Status</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; }
+        .success { color: green; }
+        .failed { color: red; }
+        .pending { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>Payment Status</h1>
+    {% if error %}
+        <p class="failed">{{ error }}</p>
+    {% else %}
+        <p>Order ID: {{ order.order_id }}</p>
+        <p>Amount: ₹{{ order.amount }}</p>
+        <p>Transaction ID: {{ txn_id }}</p>
+        {% if status == 'TXN_SUCCESS' %}
+            <p class="success">Payment Successful!</p>
+        {% elif status == 'TXN_FAILURE' %}
+            <p class="failed">Payment Failed!</p>
+        {% else %}
+            <p class="pending">Payment Pending</p>
+        {% endif %}
+    {% endif %}
+    <a href="{% url 'payment_form' %}">Make Another Payment</a>
+</body>
+</html>

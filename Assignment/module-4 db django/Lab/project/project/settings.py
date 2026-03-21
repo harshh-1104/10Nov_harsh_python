@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'Q13',
     'Q14',
     'Q15',
+    'Q16',
 ]
 
 MIDDLEWARE = [
@@ -129,3 +130,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Paytm Configuration
+PAYTM_MERCHANT_ID = 'your_merchant_id_here'
+PAYTM_MERCHANT_KEY = 'abcdefghijklmnopqrstuvwx12345678'  # 32-character dummy key for testing
+PAYTM_WEBSITE = 'WEBSTAGING'  # Use 'DEFAULT' for production
+PAYTM_CHANNEL_ID = 'WEB'
+PAYTM_INDUSTRY_TYPE_ID = 'Retail'

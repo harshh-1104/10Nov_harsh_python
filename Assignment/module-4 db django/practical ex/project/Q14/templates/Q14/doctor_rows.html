@@ -1,0 +1,21 @@
+{% for doctor in doctors %}
+<tr id="doctor-{{ doctor.pk }}">
+    <td class="doctor-name">{{ doctor.name }}</td>
+    <td class="doctor-specialization">{{ doctor.specialization }}</td>
+    <td class="doctor-hospital">{{ doctor.hospital }}</td>
+    <td class="doctor-contact">{{ doctor.contact }}</td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-warning edit-doctor me-2" 
+                data-pk="{{ doctor.pk }}" 
+                data-name="{{ doctor.name }}"
+                data-specialization="{{ doctor.specialization }}"
+                data-hospital="{{ doctor.hospital }}"
+                data-contact="{{ doctor.contact }}">Edit</button>
+        <button class="btn btn-sm btn-outline-danger delete-doctor" data-pk="{{ doctor.pk }}">Delete</button>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="5" class="text-center text-muted py-4">No doctor profiles found.</td>
+</tr>
+{% endfor %}

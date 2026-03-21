@@ -1,0 +1,12 @@
+to open every question just write its number in browser 
+ex-
+after running command runserver
+if u want to check/open question number 3 so write just this
+http://127.0.0.1:8000/q3/
+
+q3 at the end 
+
+if u want to check question 2 so write at end /q2
+
+
+For Q8 write admin in url bcz its in admin panel
