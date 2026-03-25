@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'Q14',
     'Q15',
     'Q16',
+    'Q18',
 ]
 
 MIDDLEWARE = [
@@ -137,3 +138,12 @@ PAYTM_MERCHANT_KEY = 'abcdefghijklmnopqrstuvwx12345678'  # 32-character dummy ke
 PAYTM_WEBSITE = 'WEBSTAGING'  # Use 'DEFAULT' for production
 PAYTM_CHANNEL_ID = 'WEB'
 PAYTM_INDUSTRY_TYPE_ID = 'Retail'
+
+
+#gmail otp 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'chvharsh@gmail.com'
+EMAIL_HOST_PASSWORD = 'gtex pffq tgiy wdfv'

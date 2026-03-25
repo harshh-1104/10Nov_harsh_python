@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-4xl mx-auto w-full mb-20 md:mb-0 space-y-10">
+    <div class="bg-white rounded-[2.5rem] p-10 mt-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 relative overflow-hidden">
+        <!-- Decorative Header Background -->
+        <div class="absolute top-0 left-0 right-0 h-40 bg-gradient-to-r from-slate-600 via-slate-700 to-slate-900 text-white/10 flex items-center justify-end px-12 overflow-hidden">
+            <span class="material-symbols-outlined text-9xl translate-y-8 translate-x-8 opacity-20">architecture</span>
+        </div>
+
+        <div class="relative z-10 flex flex-col md:flex-row items-center md:items-end gap-6 mb-12 mt-12 text-center md:text-left">
+            <div class="w-32 h-32 rounded-[2rem] bg-white p-2 shadow-xl shrink-0">
+                <div class="w-full h-full bg-slate-100 rounded-2xl flex items-center justify-center overflow-hidden">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAl9l8N5RhyPYiCK2FbtJ8CVaQ1iiDexyORDNPx6Mb0vmvrAdlHjt057U-nny3lGMCzI0k_DK4AXzwTQ4UCejOpAi1Q1UVrHnTMcvv2aURBEgZo6zMOh0zZxhihGLIk-cdiaisLSpGdwZXDCDaV7KyfVfo59-_3nIkADgNvwK8LOYhmbOsTGyBJ4-BKUY2lGTmi9ZFIkI_xxGO57GZ7k_poirVrZQzj5NDOGdyS5gGcsvVSZypKix3j5iDHjRs-NMnQ0FJe7brX1xGD" alt="Profile" class="w-full h-full object-cover">
+                </div>
+            </div>
+            <div class="mb-2">
+                <h2 class="text-4xl font-extrabold text-slate-800 tracking-tight">{{ user.first_name|default:user.username }}</h2>
+                <p class="text-slate-500 font-bold tracking-widest text-sm uppercase mt-1">Verified Member</p>
+            </div>
+        </div>
+
+        <form method="post" class="space-y-6 max-w-xl">
+            {% csrf_token %}
+            {% for field in form %}
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ms-1">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <p class="text-rose-500 text-xs font-medium mt-1">{{ field.errors.0 }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <div class="pt-8 flex flex-col sm:flex-row gap-4 mb-4">
+                <button type="submit" class="flex-1 bg-slate-700 text-white py-4 rounded-xl font-bold shadow-xl shadow-slate-200 hover:bg-slate-800 hover:shadow-slate-300 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all text-sm tracking-wide">
+                    Save Changes
+                </button>
+                <a href="{% url 'q18_dashboard' %}" class="flex-1 bg-white border border-slate-200 text-slate-600 py-4 rounded-xl font-bold text-center hover:bg-slate-50 transition-all text-sm tracking-wide shadow-sm hover:shadow-md flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span> Dashboard
+                </a>
+            </div>
+            <div class="sm:flex">
+                <a href="{% url 'q18_logout' %}" class="w-full bg-rose-50 border border-rose-100 text-rose-600 py-4 rounded-xl font-bold text-center hover:bg-rose-100 transition-all text-sm tracking-wide shadow-sm hover:shadow-md flex items-center justify-center gap-2 mt-4 sm:mt-0">
+                    <span class="material-symbols-outlined text-[18px]">logout</span> Log Out Securely
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
