@@ -70,7 +70,7 @@ url ma slash last ma  ex-> about\
 link ma first                 ex-> \about
 
 
-
+for passing data we use {key:value}
 return render(request,'filename',dictionary type{key:value})
 
 for passing context value write it in double curly bract {{ }}

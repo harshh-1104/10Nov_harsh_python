@@ -1,0 +1,74 @@
+api returns two type output
+xml,json
+json collection of dictonary
+
+django's library is rest frame work
+to develop api
+
+
+in modern this time we use fast api which is new
+
+api main use for mobile app
+
+when we want to use same data base in different ios android we use api
+for handling html,req,response...
+
+
+---html req---
+for fetching data         GET
+for 	insert	POST
+for	update	PUT	
+for	delete	DELETE
+
+fbv function wise ->most used
+cbv class wise
+
+decorator=dependency
+
+
+
+
+for installing restfw
+
+pip install djangorestframework
+
+then add 'rest_framework' in installed app setting
+
+
+serializers.py
+from rest_framework import serializers
+from .models import *
+
+class tablename(serializers.modelserializer)
+        class meta....
+
+
+
+
+from rest_framework import response
+
+
+
+return response(serial.data)
+
+
+from rest_framework import status
+status is class
+
+
+
+================postman=============
+in documentation url we call it end point which we make it in excel
+
+postman
+new http req->select method->paste url
+
+for post
+go to body->raw data->json
+
+
+
+deserializing includes database
+
+
+
