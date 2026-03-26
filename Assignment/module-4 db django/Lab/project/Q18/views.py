@@ -1,5 +1,6 @@
 import random
 import calendar
+from datetime import datetime, date, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum, Q
 from django.contrib.auth.models import User
@@ -9,8 +10,10 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
 from django.utils import timezone
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
-from .models import Category, Budget, Transaction, UserProfile
+from .models import Category, Budget, Transaction, UserProfile, EMI
 from .forms import CategoryForm, BudgetForm, TransactionForm, SignupForm, OTPForm, LoginForm, UserProfileUpdateForm
 
 def profile_view(request):
@@ -47,11 +50,18 @@ def signup_view(request):
             
             # Send Email
             try:
+                html_message = render_to_string('emails/otp_email.html', {
+                    'otp': otp,
+                    'first_name': form.cleaned_data['first_name']
+                })
+                plain_message = strip_tags(html_message)
+                
                 send_mail(
-                    'Your Studio OTP Verification Code',
-                    f'Your OTP is: {otp}',
+                    'Your TrackWise OTP Verification Code',
+                    plain_message,
                     settings.EMAIL_HOST_USER,
                     [form.cleaned_data['email']],
+                    html_message=html_message,
                     fail_silently=False,
                 )
                 return redirect('q18_verify_otp')
@@ -125,12 +135,41 @@ def logout_view(request):
     logout(request)
     return redirect('q18_login')
 
+def get_emi_deductions(user, year, month):
+    """Calculate total EMI burden for a specific month/year"""
+    emis = EMI.objects.filter(user=user, active=True, start_date__lte=date(year, month, calendar.monthrange(year, month)[1]))
+    total_deduction = 0
+    
+    for emi in emis:
+        # Skip if end_date exists and is in the past
+        if emi.end_date and emi.end_date < date(year, month, 1):
+            continue
+            
+        if emi.frequency == 'Monthly':
+            total_deduction += emi.amount
+        elif emi.frequency == 'Weekly':
+            # Count occurrences of start_date's weekday in the target month
+            weekday = emi.start_date.weekday() # 0=Mon, 6=Sun
+            first_day, last_day = calendar.monthrange(year, month)
+            count = 0
+            for d in range(1, last_day + 1):
+                curr_date = date(year, month, d)
+                if curr_date.weekday() == weekday and curr_date >= emi.start_date:
+                    if not emi.end_date or curr_date <= emi.end_date:
+                        count += 1
+            total_deduction += (count * emi.amount)
+            
+    return total_deduction
+
 @login_required(login_url='q18_login')
 def dashboard_view(request):
     # Get period from request or default to current month
     now = timezone.now()
-    month = int(request.GET.get('month', now.month))
-    year = int(request.GET.get('year', now.year))
+    month_raw = request.GET.get('month')
+    year_raw = request.GET.get('year')
+    
+    month = int(month_raw) if month_raw and month_raw.isdigit() else now.month
+    year = int(year_raw) if year_raw and year_raw.isdigit() else now.year
     
     # Calculate previous and next month for navigation
     prev_month = month - 1 if month > 1 else 12
@@ -139,19 +178,29 @@ def dashboard_view(request):
     next_year = year if month < 12 else year + 1
     
     # Selected Month Statistics
-    transactions = Transaction.objects.filter(date__month=month, date__year=year).order_by('-date')
+    transactions = Transaction.objects.filter(user=request.user, date__month=month, date__year=year).order_by('-date')
     recent_transactions = transactions[:5]
     
-    selected_income = Transaction.objects.filter(type='Income', date__month=month, date__year=year).aggregate(Sum('amount'))['amount__sum'] or 0
-    selected_expenses = Transaction.objects.filter(type='Expense', date__month=month, date__year=year).aggregate(Sum('amount'))['amount__sum'] or 0
+    # EMI Deductions
+    emi_total = get_emi_deductions(request.user, year, month)
+    
+    # EMI Toggle State
+    show_emi = request.GET.get('show_emi', 'true') == 'true'
+    
+    # Adjust Income (Net Income)
+    selected_income = (Transaction.objects.filter(user=request.user, type='Income', date__month=month, date__year=year).aggregate(Sum('amount'))['amount__sum'] or 0)
+    if show_emi:
+        selected_income -= emi_total
+    
+    selected_expenses = Transaction.objects.filter(user=request.user, type='Expense', date__month=month, date__year=year).aggregate(Sum('amount'))['amount__sum'] or 0
     
     # All-time Net Worth (Cumulative)
-    all_income = Transaction.objects.filter(type='Income').aggregate(Sum('amount'))['amount__sum'] or 0
-    all_expenses = Transaction.objects.filter(type='Expense').aggregate(Sum('amount'))['amount__sum'] or 0
+    all_income = Transaction.objects.filter(user=request.user, type='Income').aggregate(Sum('amount'))['amount__sum'] or 0
+    all_expenses = Transaction.objects.filter(user=request.user, type='Expense').aggregate(Sum('amount'))['amount__sum'] or 0
     total_balance = all_income - all_expenses
     
     # Category summary for the selected month
-    categories = Category.objects.annotate(
+    categories = Category.objects.filter(user=request.user).annotate(
         total_spent=Sum('transaction__amount', filter=Q(
             transaction__type='Expense', 
             transaction__date__month=month, 
@@ -163,6 +212,7 @@ def dashboard_view(request):
         'recent_transactions': recent_transactions,
         'selected_income': selected_income,
         'selected_expenses': selected_expenses,
+        'emi_burden': emi_total,
         'total_balance': total_balance,
         'categories_summary': categories,
         'current_month_name': calendar.month_name[month],
@@ -172,7 +222,8 @@ def dashboard_view(request):
         'prev_year': prev_year,
         'next_month': next_month,
         'next_year': next_year,
-        'is_current_period': (month == now.month and year == now.year)
+        'is_current_period': (month == now.month and year == now.year),
+        'show_emi': show_emi
     }
     return render(request, 'dashboard.html', context)
 
@@ -184,21 +235,23 @@ def transaction_list_view(request):
     
     # Filter by month/year if provided
     if month and year:
-        transactions = Transaction.objects.filter(date__month=month, date__year=year).order_by('-date')
+        transactions = Transaction.objects.filter(user=request.user, date__month=month, date__year=year).order_by('-date')
         period_name = f"{calendar.month_name[int(month)]} {year}"
     else:
-        transactions = Transaction.objects.all().order_by('-date')
+        transactions = Transaction.objects.filter(user=request.user).order_by('-date')
         period_name = "All Time"
 
     if request.method == 'POST':
-        form = TransactionForm(request.POST)
+        form = TransactionForm(request.POST, user=request.user)
         if form.is_valid():
-            form.save()
+            transaction = form.save(commit=False)
+            transaction.user = request.user
+            transaction.save()
             return redirect('q18_transactions')
     else:
         # Pre-fill type if provided in GET
         initial_type = request.GET.get('type', 'Expense')
-        form = TransactionForm(initial={'type': initial_type})
+        form = TransactionForm(initial={'type': initial_type}, user=request.user)
     return render(request, 'transactions.html', {
         'transactions': transactions, 
         'form': form,
@@ -207,11 +260,13 @@ def transaction_list_view(request):
 
 @login_required(login_url='q18_login')
 def category_list_view(request):
-    categories = Category.objects.all()
+    categories = Category.objects.filter(user=request.user)
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
-            form.save()
+            category = form.save(commit=False)
+            category.user = request.user
+            category.save()
             return redirect('q18_categories')
     else:
         form = CategoryForm()
@@ -224,19 +279,28 @@ def category_list_view(request):
 
 @login_required(login_url='q18_login')
 def budget_list_view(request):
-    budgets = Budget.objects.all()
+    budgets = Budget.objects.filter(category__user=request.user, category__type='Expense')
     budget_data = []
     current_month = timezone.now().month
     current_year = timezone.now().year
     
+    total_budget_expense = 0
+    total_spent_expense = 0
+    
     for budget in budgets:
         spent = Transaction.objects.filter(
+            user=request.user,
             category=budget.category, 
-            type='Expense',
+            type=budget.category.type,
             date__month=current_month,
             date__year=current_year
         ).aggregate(Sum('amount'))['amount__sum'] or 0
         
+        # Only include expenses in the header summary totals
+        if budget.category.type == 'Expense':
+            total_budget_expense += budget.amount_limit
+            total_spent_expense += spent
+            
         percentage = min(int((spent / budget.amount_limit) * 100) if budget.amount_limit > 0 else 100, 100)
         budget_data.append({
             'budget': budget,
@@ -248,37 +312,46 @@ def budget_list_view(request):
         
     if request.method == 'POST':
         category_id = request.POST.get('category')
-        instance = Budget.objects.filter(category_id=category_id).first()
-        form = BudgetForm(request.POST, instance=instance)
+        instance = Budget.objects.filter(category_id=category_id, category__user=request.user).first()
+        form = BudgetForm(request.POST, instance=instance, user=request.user)
         if form.is_valid():
-            form.save()
+            budget = form.save(commit=False)
+            budget.save()
             messages.success(request, f"Budget limit updated successfully.")
             return redirect('q18_budgets')
     else:
-        form = BudgetForm()
+        form = BudgetForm(user=request.user)
         
     context = {
         'budget_data': budget_data,
         'form': form,
-        'total_budget': sum(b.amount_limit for b in budgets),
-        'total_spent': sum(d['spent'] for d in budget_data),
+        'total_budget': total_budget_expense,
+        'total_spent': total_spent_expense,
     }
     return render(request, 'budgets.html', context)
 
 @login_required(login_url='q18_login')
 def reports_view(request):
     now = timezone.now()
-    current_month = int(request.GET.get('month', now.month))
-    current_year = int(request.GET.get('year', now.year))
+    month_raw = request.GET.get('month')
+    year_raw = request.GET.get('year')
+    current_month = int(month_raw) if month_raw and month_raw.isdigit() else now.month
+    current_year = int(year_raw) if year_raw and year_raw.isdigit() else now.year
 
     # 1. Monthly Summary (For Selected Period)
     total_income = Transaction.objects.filter(
+        user=request.user,
         type='Income', 
         date__month=current_month, 
         date__year=current_year
     ).aggregate(Sum('amount'))['amount__sum'] or 0
     
+    # EMI Deductions for the report period
+    emi_total = get_emi_deductions(request.user, current_year, current_month)
+    total_income -= emi_total
+    
     total_expenses = Transaction.objects.filter(
+        user=request.user,
         type='Expense', 
         date__month=current_month, 
         date__year=current_year
@@ -288,7 +361,7 @@ def reports_view(request):
     savings_rate = (savings / total_income * 100) if total_income > 0 else 0
 
     # 2. Category Breakdown (Expenses)
-    category_expenses = Category.objects.filter(type='Expense').annotate(
+    category_expenses = Category.objects.filter(user=request.user, type='Expense').annotate(
         amount=Sum('transaction__amount', filter=Q(
             transaction__type='Expense',
             transaction__date__month=current_month,
@@ -308,27 +381,38 @@ def reports_view(request):
         })
 
     # 3. Monthly Trends (Last 6 Months)
-    trends = []
+    trends_raw = []
+    max_val = 0
     for i in range(5, -1, -1):
-        # Calculate date for each of the last 6 months
-        # A simple way to get month/year for the last 6 months
         target_month = current_month - i
         target_year = current_year
         while target_month <= 0:
             target_month += 12
             target_year -= 1
         
-        m_inc = Transaction.objects.filter(type='Income', date__month=target_month, date__year=target_year).aggregate(Sum('amount'))['amount__sum'] or 0
-        m_exp = Transaction.objects.filter(type='Expense', date__month=target_month, date__year=target_year).aggregate(Sum('amount'))['amount__sum'] or 0
+        m_inc = Transaction.objects.filter(user=request.user, type='Income', date__month=target_month, date__year=target_year).aggregate(Sum('amount'))['amount__sum'] or 0
+        m_emi = get_emi_deductions(request.user, target_year, target_month)
+        m_inc = max(0, m_inc - m_emi) # Net Income
         
-        # Max height for bars is 100px. Scaling factor based on a reasonable max (e.g., 5000)
-        scale = 50
-        trends.append({
+        m_exp = Transaction.objects.filter(user=request.user, type='Expense', date__month=target_month, date__year=target_year).aggregate(Sum('amount'))['amount__sum'] or 0
+        
+        max_val = max(max_val, m_inc, m_exp)
+        trends_raw.append({
             'month': calendar.month_name[target_month][:3],
             'income': m_inc,
-            'expense': m_exp,
-            'income_h': min(int(m_inc / scale), 100) if m_inc > 0 else 2,
-            'expense_h': min(int(m_exp / scale), 100) if m_exp > 0 else 2
+            'expense': m_exp
+        })
+
+    # Scale the heights based on max_val
+    trends = []
+    scale = max_val / 100 if max_val > 0 else 1
+    for t in trends_raw:
+        trends.append({
+            'month': t['month'],
+            'income': t['income'],
+            'expense': t['expense'],
+            'income_h': max(2, int(t['income'] / scale)) if t['income'] > 0 else 2,
+            'expense_h': max(2, int(t['expense'] / scale)) if t['expense'] > 0 else 2
         })
 
     # Calculate previous and next month for navigation
@@ -352,13 +436,14 @@ def reports_view(request):
         'prev_year': prev_year,
         'next_month': next_month,
         'next_year': next_year,
-        'is_current_period': (current_month == now.month and current_year == now.year)
+        'is_current_period': (current_month == now.month and current_year == now.year),
+        'emi_burden': emi_total
     }
     return render(request, 'reports.html', context)
 
 @login_required(login_url='q18_login')
 def delete_transaction_view(request, pk):
-    transaction = get_object_or_404(Transaction, pk=pk)
+    transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
     if request.method == 'POST':
         transaction.delete()
         messages.success(request, "Transaction deleted successfully.")
@@ -366,7 +451,7 @@ def delete_transaction_view(request, pk):
 
 @login_required(login_url='q18_login')
 def delete_category_view(request, pk):
-    category = get_object_or_404(Category, pk=pk)
+    category = get_object_or_404(Category, pk=pk, user=request.user)
     if request.method == 'POST':
         category.delete()
         messages.success(request, "Category deleted successfully.")
@@ -374,9 +459,45 @@ def delete_category_view(request, pk):
 
 @login_required(login_url='q18_login')
 def delete_budget_view(request, pk):
-    budget = get_object_or_404(Budget, pk=pk)
+    budget = get_object_or_404(Budget, pk=pk, category__user=request.user)
     if request.method == 'POST':
         category_name = budget.category.name
         budget.delete()
         messages.success(request, f"Budget for {category_name} removed successfully.")
     return redirect('q18_budgets')
+
+@login_required(login_url='q18_login')
+def emi_list_view(request):
+    if request.method == 'POST':
+        description = request.POST.get('description')
+        amount = request.POST.get('amount')
+        frequency = request.POST.get('frequency')
+        start_date = request.POST.get('start_date')
+        
+        EMI.objects.create(
+            user=request.user,
+            description=description,
+            amount=amount,
+            frequency=frequency,
+            start_date=start_date
+        )
+        messages.success(request, f"EMI for '{description}' added successfully.")
+        return redirect('q18_emi')
+
+    emis = EMI.objects.filter(user=request.user)
+    today = date.today()
+    monthly_burden = get_emi_deductions(request.user, today.year, today.month)
+    
+    return render(request, 'emi.html', {
+        'emis': emis,
+        'monthly_burden': monthly_burden
+    })
+
+@login_required(login_url='q18_login')
+def delete_emi_view(request, pk):
+    emi = get_object_or_404(EMI, pk=pk, user=request.user)
+    if request.method == 'POST':
+        description = emi.description
+        emi.delete()
+        messages.success(request, f"EMI for '{description}' removed.")
+    return redirect('q18_emi')

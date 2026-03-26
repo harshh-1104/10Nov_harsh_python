@@ -51,13 +51,26 @@
 
         <!-- Total Income -->
         <div class="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-[14rem] group hover:border-emerald-100 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/10">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 shadow-sm group-hover:bg-emerald-100 transition-colors">
-                <span class="material-symbols-outlined">trending_up</span>
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm group-hover:bg-emerald-100 transition-colors">
+                    <span class="material-symbols-outlined">trending_up</span>
+                </div>
+                <a href="?month={{ month }}&year={{ year }}&show_emi={% if show_emi %}false{% else %}true{% endif %}" 
+                   class="p-1.5 px-3 rounded-xl {% if show_emi %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-slate-50 text-slate-400 border-slate-100{% endif %} text-[9px] font-bold uppercase tracking-widest hover:shadow-sm transition-all active:scale-90 border flex items-center gap-1.5"
+                   title="Toggle EMI Deduction">
+                    <span class="w-1.5 h-1.5 rounded-full {% if show_emi %}bg-emerald-500 animate-pulse{% else %}bg-slate-300{% endif %}"></span>
+                    EMI: {% if show_emi %}Deducted{% else %}Gross{% endif %}
+                </a>
             </div>
-            <div class="overflow-hidden">
+            <div>
                 <span class="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-slate-400">Monthly Income</span>
                 <p class="text-[10px] text-slate-400 font-medium mt-1 mb-2 truncate">Earned in {{ current_month_name }}</p>
                 <h3 class="text-3xl font-extrabold text-slate-800 mt-1 group-hover:text-emerald-600 transition-colors truncate">₹{{ selected_income|floatformat:2 }}</h3>
+                <div class="flex items-center gap-2 mt-2 h-4">
+                    {% if emi_burden > 0 and show_emi %}
+                    <span class="text-[9px] font-black text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded uppercase border border-rose-100/50">EMI Applied</span>
+                    {% endif %}
+                </div>
             </div>
         </div>
 

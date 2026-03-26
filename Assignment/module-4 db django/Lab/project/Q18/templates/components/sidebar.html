@@ -38,6 +38,11 @@
             <span class="material-symbols-outlined">analytics</span>
             <span class="text-sm">Reports</span>
         </a>
+        <a href="{% url 'q18_emi' %}"
+            class="flex items-center gap-4 px-4 py-3.5 text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 rounded-2xl transition-all duration-300 font-medium {% if request.resolver_match.url_name == 'q18_emi' %}bg-slate-200/80 text-slate-800 font-bold{% endif %}">
+            <span class="material-symbols-outlined">credit_score</span>
+            <span class="text-sm">EMI Tracker</span>
+        </a>
         <a href="{% url 'q18_profile' %}"
             class="flex items-center gap-4 px-4 py-3.5 text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 rounded-2xl transition-all duration-300 font-medium {% if request.resolver_match.url_name == 'q18_profile' %}bg-slate-200/80 text-slate-800 font-bold{% endif %}">
             <span class="material-symbols-outlined">person</span>
@@ -81,6 +86,11 @@
         class="flex flex-col items-center gap-1 {% if request.resolver_match.url_name == 'q18_budgets' %}text-slate-800{% else %}text-slate-400{% endif %}">
         <span class="material-symbols-outlined"
             style="font-variation-settings: 'FILL' {% if request.resolver_match.url_name == 'q18_budgets' %}1{% else %}0{% endif %};">pie_chart</span>
+    </a>
+    <a href="{% url 'q18_emi' %}"
+        class="flex flex-col items-center gap-1 {% if request.resolver_match.url_name == 'q18_emi' %}text-slate-800{% else %}text-slate-400{% endif %}">
+        <span class="material-symbols-outlined"
+            style="font-variation-settings: 'FILL' {% if request.resolver_match.url_name == 'q18_emi' %}1{% else %}0{% endif %};">credit_score</span>
     </a>
     <a href="{% url 'q18_categories' %}"
         class="flex flex-col items-center gap-1 {% if request.resolver_match.url_name == 'q18_categories' %}text-slate-800{% else %}text-slate-400{% endif %}">

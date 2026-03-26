@@ -22,8 +22,12 @@ class BudgetForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        self.fields['category'].queryset = Category.objects.filter(type='Income')
+        if user:
+            self.fields['category'].queryset = Category.objects.filter(user=user, type='Expense')
+        else:
+            self.fields['category'].queryset = Category.objects.filter(type='Expense')
 
 class TransactionForm(forms.ModelForm):
     class Meta:
@@ -36,6 +40,12 @@ class TransactionForm(forms.ModelForm):
             'type': forms.Select(attrs={'class': INPUT_CLASS}),
             'date': forms.DateInput(attrs={'type': 'date', 'class': INPUT_CLASS}),
         }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['category'].queryset = Category.objects.filter(user=user)
 
 class SignupForm(forms.Form):
     first_name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'John'}))
