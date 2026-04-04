@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grand Line Projects — One Piece Django Hub</title>
+  <meta name="description"
+    content="Navigate through all Django project apps with this One Piece themed adventure hub." />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Pirata+One&display=swap"
+    rel="stylesheet">
+  <script src="https://unpkg.com/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
+  <style>
+    /* ═══════════════════════════════════════════
+       CSS RESET & VARIABLES
+    ═══════════════════════════════════════════ */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Twemoji global sizing — prevent giant SVGs */
+    img.emoji {
+      height: 1em !important;
+      width: 1em !important;
+      vertical-align: -0.1em;
+      display: inline-block;
+    }
+
+    .card-icon img.emoji {
+      height: 48px !important;
+      width: 48px !important;
+    }
+
+    .featured-icon img.emoji {
+      height: 80px !important;
+      width: 80px !important;
+    }
+
+    .jolly-roger img.emoji {
+      height: 80px !important;
+      width: 80px !important;
+    }
+
+    .loader-skull img.emoji {
+      height: 64px !important;
+      width: 64px !important;
+    }
+
+    .compass img.emoji {
+      height: 28px !important;
+      width: 28px !important;
+    }
+
+    .pirate-flag img.emoji {
+      height: 32px !important;
+      width: 32px !important;
+    }
+
+    .section-title img.emoji {
+      height: 1.8rem !important;
+      width: 1.8rem !important;
+    }
+
+    .featured-badge img.emoji {
+      height: 0.7rem !important;
+      width: 0.7rem !important;
+    }
+
+    :root {
+      --op-red: #C8102E;
+      --op-red-glow: rgba(200, 16, 46, 0.5);
+      --op-yellow: #FFD700;
+      --op-yellow-glow: rgba(255, 215, 0, 0.4);
+      --op-blue: #1A5276;
+      --op-sky: #2980B9;
+      --op-ocean: #0C2340;
+      --op-ocean-deep: #061224;
+      --op-gold: #F39C12;
+      --op-white: #ECF0F1;
+      --glass-bg: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --glass-shadow: rgba(0, 0, 0, 0.3);
+      --card-radius: 20px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--op-ocean-deep);
+      color: var(--op-white);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ═══════════════════════════════════════════
+       ANIMATED BACKGROUND — OCEAN & SKY
+    ═══════════════════════════════════════════ */
+    .bg-ocean {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(180deg,
+          #0a0e27 0%,
+          #0d1b3e 15%,
+          #0f2955 30%,
+          #133c6b 50%,
+          #1a5276 65%,
+          #1e6891 80%,
+          #2980b9 100%);
+    }
+
+    /* Stars */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50vh;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle var(--dur) ease-in-out infinite alternate;
+      opacity: 0;
+    }
+
+    @keyframes twinkle {
+      0% {
+        opacity: 0.1;
+        transform: scale(0.8);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1.3);
+      }
+    }
+
+    /* Floating Clouds */
+    .clouds {
+      position: fixed;
+      top: 5%;
+      width: 200%;
+      height: 200px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .cloud {
+      position: absolute;
+      background: radial-gradient(ellipse, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: driftCloud linear infinite;
+    }
+
+    @keyframes driftCloud {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    /* Ocean Waves */
+    .wave-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 180px;
+      z-index: 2;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .wave {
+      position: absolute;
+      bottom: 0;
+      width: 200%;
+      height: 100%;
+      background: repeat-x;
+    }
+
+    .wave-1 {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='rgba(26,82,118,0.35)' d='M0,224L48,213.3C96,203,192,181,288,186.7C384,192,480,224,576,218.7C672,213,768,171,864,165.3C960,160,1056,192,1152,197.3C1248,203,1344,181,1392,170.7L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") bottom / 1440px 320px;
+      animation: waveMove1 8s linear infinite;
+      opacity: 0.7;
+    }
+
+    .wave-2 {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='rgba(12,35,64,0.5)' d='M0,288L48,272C96,256,192,224,288,224C384,224,480,256,576,261.3C672,267,768,245,864,240C960,235,1056,245,1152,250.7C1248,256,1344,256,1392,256L1440,256L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") bottom / 1440px 320px;
+      animation: waveMove2 6s linear infinite;
+      opacity: 0.5;
+    }
+
+    .wave-3 {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='rgba(6,18,36,0.7)' d='M0,256L48,250.7C96,245,192,235,288,234.7C384,235,480,245,576,234.7C672,224,768,192,864,186.7C960,181,1056,203,1152,213.3C1248,224,1344,224,1392,224L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") bottom / 1440px 320px;
+      animation: waveMove3 10s linear infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes waveMove1 {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    @keyframes waveMove2 {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    @keyframes waveMove3 {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    /* Floating Particles (treasure sparkles) */
+    .particles {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--op-yellow);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--op-yellow-glow);
+      animation: floatUp var(--dur) ease-in infinite;
+      opacity: 0;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 0;
+        transform: translateY(0) scale(0);
+      }
+
+      20% {
+        opacity: 1;
+        transform: translateY(-30px) scale(1);
+      }
+
+      80% {
+        opacity: 0.6;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-200px) scale(0.3);
+      }
+    }
+
+    /* ═══════════════════════════════════════════
+       CONTENT WRAPPER
+    ═══════════════════════════════════════════ */
+    .content {
+      position: relative;
+      z-index: 10;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 24px 220px;
+    }
+
+    /* ═══════════════════════════════════════════
+       HEADER — JOLLY ROGER STYLE
+    ═══════════════════════════════════════════ */
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+      animation: headerSlideIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes headerSlideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.9);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .jolly-roger {
+      font-size: 80px;
+      margin-bottom: 8px;
+      animation: skullBob 3s ease-in-out infinite;
+      display: inline-block;
+    }
+
+    .jolly-roger img.emoji {
+      width: 80px;
+      height: 80px;
+    }
+
+    @keyframes skullBob {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(-2deg);
+      }
+
+      50% {
+        transform: translateY(-12px) rotate(2deg);
+      }
+    }
+
+    .main-title {
+      font-family: 'Pirata One', cursive;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      background: linear-gradient(135deg, var(--op-yellow), #FF8C00, var(--op-red));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      filter: drop-shadow(0 4px 20px var(--op-yellow-glow));
+      letter-spacing: 2px;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 12px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    .divider {
+      width: 180px;
+      height: 3px;
+      margin: 20px auto 0;
+      background: linear-gradient(90deg, transparent, var(--op-yellow), var(--op-red), var(--op-yellow), transparent);
+      border-radius: 4px;
+      animation: shimmerDivider 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmerDivider {
+
+      0%,
+      100% {
+        opacity: 0.5;
+        width: 180px;
+      }
+
+      50% {
+        opacity: 1;
+        width: 250px;
+      }
+    }
+
+    /* ═══════════════════════════════════════════
+       SECTION TITLE
+    ═══════════════════════════════════════════ */
+    .section-title {
+      font-family: 'Pirata One', cursive;
+      font-size: 1.8rem;
+      color: var(--op-yellow);
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-shadow: 0 0 15px var(--op-yellow-glow);
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--op-yellow-glow), transparent);
+    }
+
+    /* ═══════════════════════════════════════════
+       GLASSMORPHISM CARDS — 3D
+    ═══════════════════════════════════════════ */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 28px;
+      perspective: 1200px;
+      margin-bottom: 60px;
+    }
+
+    .glass-card {
+      position: relative;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--card-radius);
+      padding: 32px 28px 28px;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--op-white);
+      display: block;
+      animation: cardEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: var(--delay, 0ms);
+    }
+
+    @keyframes cardEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(60px) rotateX(15deg) scale(0.9);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0) scale(1);
+      }
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--card-radius);
+      background: linear-gradient(135deg,
+          rgba(255, 255, 255, 0.1) 0%,
+          transparent 50%,
+          rgba(255, 255, 255, 0.03) 100%);
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+
+    .glass-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
+          rgba(255, 215, 0, 0.08) 0%,
+          transparent 60%);
+      pointer-events: none;
+      transition: opacity 0.3s;
+      opacity: 0;
+    }
+
+    .glass-card:hover::after {
+      opacity: 1;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-12px) rotateX(4deg) rotateY(-2deg) scale(1.03);
+      border-color: rgba(255, 215, 0, 0.3);
+      box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.4),
+        0 0 40px var(--glow-color, var(--op-yellow-glow)),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .card-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: inline-block;
+      transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .card-icon img.emoji {
+      width: 48px;
+      height: 48px;
+    }
+
+    .glass-card:hover .card-icon {
+      transform: scale(1.2) translateY(-4px) rotateY(20deg);
+    }
+
+    .card-number {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-family: 'Pirata One', cursive;
+      font-size: 1.1rem;
+      color: rgba(255, 215, 0, 0.3);
+      letter-spacing: 1px;
+    }
+
+    .card-title {
+      font-family: 'Pirata One', cursive;
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.8));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .card-subtitle {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .card-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: rgba(255, 215, 0, 0.12);
+      color: var(--op-yellow);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .card-arrow {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.4s;
+      color: var(--op-yellow);
+    }
+
+    .glass-card:hover .card-arrow {
+      background: var(--op-yellow);
+      color: var(--op-ocean-deep);
+      transform: translateX(4px);
+      box-shadow: 0 0 20px var(--op-yellow-glow);
+    }
+
+    /* Card color variants */
+    .card-red {
+      --glow-color: var(--op-red-glow);
+    }
+
+    .card-red .card-tag {
+      background: rgba(200, 16, 46, 0.15);
+      color: #ff6b81;
+      border-color: rgba(200, 16, 46, 0.3);
+    }
+
+    .card-red:hover {
+      border-color: rgba(200, 16, 46, 0.4);
+    }
+
+    .card-gold {
+      --glow-color: var(--op-yellow-glow);
+    }
+
+    .card-blue {
+      --glow-color: rgba(41, 128, 185, 0.5);
+    }
+
+    .card-blue .card-tag {
+      background: rgba(41, 128, 185, 0.15);
+      color: #74b9ff;
+      border-color: rgba(41, 128, 185, 0.3);
+    }
+
+    .card-blue:hover {
+      border-color: rgba(41, 128, 185, 0.4);
+    }
+
+    .card-green {
+      --glow-color: rgba(46, 204, 113, 0.4);
+    }
+
+    .card-green .card-tag {
+      background: rgba(46, 204, 113, 0.12);
+      color: #55efc4;
+      border-color: rgba(46, 204, 113, 0.25);
+    }
+
+    .card-green:hover {
+      border-color: rgba(46, 204, 113, 0.4);
+    }
+
+    .card-purple {
+      --glow-color: rgba(155, 89, 182, 0.4);
+    }
+
+    .card-purple .card-tag {
+      background: rgba(155, 89, 182, 0.12);
+      color: #d6a4ff;
+      border-color: rgba(155, 89, 182, 0.25);
+    }
+
+    .card-purple:hover {
+      border-color: rgba(155, 89, 182, 0.4);
+    }
+
+    .card-orange {
+      --glow-color: rgba(243, 156, 18, 0.5);
+    }
+
+    .card-orange .card-tag {
+      background: rgba(243, 156, 18, 0.12);
+      color: #ffc048;
+      border-color: rgba(243, 156, 18, 0.25);
+    }
+
+    .card-orange:hover {
+      border-color: rgba(243, 156, 18, 0.4);
+    }
+
+    /* ═══════════════════════════════════════════
+       FEATURED / HERO CARD — TRACKWISE
+    ═══════════════════════════════════════════ */
+    .featured-card {
+      position: relative;
+      background: linear-gradient(135deg, rgba(200, 16, 46, 0.12), rgba(255, 215, 0, 0.08), rgba(41, 128, 185, 0.1));
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 215, 0, 0.25);
+      border-radius: 28px;
+      padding: 48px 40px;
+      margin-bottom: 60px;
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      text-decoration: none;
+      color: var(--op-white);
+      transform-style: preserve-3d;
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      overflow: hidden;
+      animation: heroEnter 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+      cursor: pointer;
+    }
+
+    @keyframes heroEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .featured-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 60%);
+      pointer-events: none;
+    }
+
+    .featured-card:hover {
+      transform: translateY(-8px) scale(1.01);
+      border-color: rgba(255, 215, 0, 0.5);
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.4),
+        0 0 60px var(--op-yellow-glow),
+        0 0 120px rgba(200, 16, 46, 0.15);
+    }
+
+    .featured-icon {
+      font-size: 80px;
+      flex-shrink: 0;
+      animation: iconPulse 4s ease-in-out infinite;
+    }
+
+    .featured-icon img.emoji {
+      width: 80px;
+      height: 80px;
+    }
+
+    @keyframes iconPulse {
+
+      0%,
+      100% {
+        transform: scale(1) rotateY(0);
+      }
+
+      50% {
+        transform: scale(1.08) rotateY(10deg);
+      }
+    }
+
+    .featured-content {
+      flex: 1;
+    }
+
+    .featured-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, var(--op-red), #ff6b81);
+      color: #fff;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 15px var(--op-red-glow);
+    }
+
+    .featured-title {
+      font-family: 'Pirata One', cursive;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      background: linear-gradient(135deg, var(--op-yellow), #FFB347, #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .featured-desc {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.6;
+      max-width: 600px;
+    }
+
+    .featured-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+      padding: 12px 28px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--op-yellow), var(--op-gold));
+      color: var(--op-ocean-deep);
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s;
+      box-shadow: 0 6px 24px var(--op-yellow-glow);
+    }
+
+    .featured-card:hover .featured-cta {
+      box-shadow: 0 8px 32px var(--op-yellow-glow);
+      transform: translateX(4px);
+    }
+
+    /* ═══════════════════════════════════════════
+       ADMIN CARD (Special)
+    ═══════════════════════════════════════════ */
+    .admin-row {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+      margin-bottom: 60px;
+    }
+
+    .admin-card {
+      flex: 1;
+      min-width: 280px;
+      background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), rgba(200, 16, 46, 0.06));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(155, 89, 182, 0.2);
+      border-radius: var(--card-radius);
+      padding: 28px;
+      text-decoration: none;
+      color: var(--op-white);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      animation: cardEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: 1.5s;
+    }
+
+    .admin-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(155, 89, 182, 0.5);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 0 30px rgba(155, 89, 182, 0.3);
+    }
+
+    .admin-card .card-icon {
+      margin-bottom: 0;
+      font-size: 40px;
+    }
+
+    .admin-card .card-title {
+      font-size: 1.2rem;
+      margin-bottom: 4px;
+    }
+
+    .admin-card .card-subtitle {
+      margin-bottom: 0;
+      font-size: 0.8rem;
+    }
+
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    .footer {
+      text-align: center;
+      padding: 40px 0 60px;
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 0.85rem;
+      animation: cardEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: 1.8s;
+    }
+
+    .footer .pirate-flag {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .footer a {
+      color: var(--op-yellow);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* ═══════════════════════════════════════════
+       SCROLLBAR
+    ═══════════════════════════════════════════ */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--op-ocean-deep);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(var(--op-yellow), var(--op-red));
+      border-radius: 4px;
+    }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .content {
+        padding: 24px 16px 200px;
+      }
+
+      .featured-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 32px 24px;
+        gap: 20px;
+      }
+
+      .featured-desc {
+        margin: 0 auto;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .glass-card {
+        padding: 24px 20px 20px;
+      }
+
+      .card-icon {
+        font-size: 36px;
+      }
+
+      .card-title {
+        font-size: 1.2rem;
+      }
+
+      .admin-row {
+        flex-direction: column;
+      }
+
+      .jolly-roger {
+        font-size: 56px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ═══════════════════════════════════════════
+       LOADING ANIMATION
+    ═══════════════════════════════════════════ */
+    .loader-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--op-ocean-deep);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s, visibility 0.6s;
+    }
+
+    .loader-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader-skull {
+      font-size: 64px;
+      animation: loaderBounce 1s ease-in-out infinite;
+    }
+
+    @keyframes loaderBounce {
+
+      0%,
+      100% {
+        transform: translateY(0) scale(1);
+      }
+
+      50% {
+        transform: translateY(-20px) scale(1.1);
+      }
+    }
+
+    .loader-text {
+      font-family: 'Pirata One', cursive;
+      font-size: 1.4rem;
+      color: var(--op-yellow);
+      margin-top: 16px;
+      animation: loaderPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes loaderPulse {
+
+      0%,
+      100% {
+        opacity: 0.4;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    /* ═══════════════════════════════════════════
+       COMPASS NAVIGATION INDICATOR
+    ═══════════════════════════════════════════ */
+    .compass {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 56px;
+      height: 56px;
+      z-index: 100;
+      border-radius: 50%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      animation: compassSpin 6s linear infinite;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .compass:hover {
+      transform: scale(1.15);
+      box-shadow: 0 8px 32px var(--op-yellow-glow);
+      border-color: var(--op-yellow);
+    }
+
+    @keyframes compassSpin {
+      0% {
+        transform: rotate(0);
+      }
+
+      25% {
+        transform: rotate(15deg);
+      }
+
+      50% {
+        transform: rotate(0);
+      }
+
+      75% {
+        transform: rotate(-15deg);
+      }
+
+      100% {
+        transform: rotate(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Loading Screen -->
+  <div class="loader-overlay" id="loader">
+    <div class="loader-skull">🏴‍☠️</div>
+    <div class="loader-text">Setting Sail...</div>
+  </div>
+
+  <!-- Background Layers -->
+  <div class="bg-ocean"></div>
+  <div class="stars" id="stars"></div>
+  <div class="clouds">
+    <div class="cloud" style="width:400px;height:80px;top:20px;left:10%;animation-duration:35s"></div>
+    <div class="cloud" style="width:300px;height:60px;top:60px;left:40%;animation-duration:40s"></div>
+    <div class="cloud" style="width:500px;height:100px;top:10px;left:70%;animation-duration:30s"></div>
+  </div>
+  <div class="particles" id="particles"></div>
+  <div class="wave-container">
+    <div class="wave wave-1"></div>
+    <div class="wave wave-2"></div>
+    <div class="wave wave-3"></div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="jolly-roger">☠️</div>
+      <h1 class="main-title">Grand Line Projects</h1>
+      <p class="subtitle">⚓ Django Adventure Hub ⚓</p>
+      <p class="subtitle"
+        style="margin-top: 14px; letter-spacing: 3px; font-size: clamp(0.9rem, 1.5vw, 1.1rem); color: rgba(255,215,0,0.7);">
+        by Harsh Chauhan</p>
+      <div class="divider"></div>
+    </header>
+
+    <!-- Featured: TrackWise Finance Tracker -->
+    <a href="/q17_18_19/" class="featured-card" id="featuredCard">
+      <div class="featured-icon">💰</div>
+      <div class="featured-content">
+        <span class="featured-badge">★ Flagship App</span>
+        <h2 class="featured-title">Q17,18,19 — Finance Tracker (TrackWise)</h2>
+        <p class="featured-desc">
+          Full-featured finance tracker with OTP auth, dashboards, budgets, EMIs, reports &amp; category management.
+        </p>
+        <div class="featured-cta">
+          Open App →
+        </div>
+      </div>
+    </a>
+
+    <!-- Section: Core Apps -->
+    <h2 class="section-title">🏴‍☠️ East Blue — Foundations</h2>
+    <div class="card-grid">
+
+      <a href="/q1/" class="glass-card card-gold" style="--delay: 200ms" id="card-q1">
+        <span class="card-number">Q1</span>
+        <div class="card-icon">🌅</div>
+        <h3 class="card-title">Q1 — Django Template Demo</h3>
+        <p class="card-subtitle">Render a simple template using Django's template engine.</p>
+        <span class="card-tag">Templates</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="/q2/" class="glass-card card-blue" style="--delay: 300ms" id="card-q2">
+        <span class="card-number">Q2</span>
+        <div class="card-icon">🚢</div>
+        <h3 class="card-title">Q2 — Styled Template</h3>
+        <p class="card-subtitle">Template that includes a static CSS stylesheet for styling.</p>
+        <span class="card-tag">Static CSS</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="/q3/" class="glass-card card-red" style="--delay: 400ms" id="card-q3">
+        <span class="card-number">Q3</span>
+        <div class="card-icon">🧭</div>
+        <h3 class="card-title">Q3 — JS Form Validation</h3>
+        <p class="card-subtitle">Form page with client-side JavaScript validation.</p>
+        <span class="card-tag">JS Validation</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="/q4/" class="glass-card card-green" style="--delay: 500ms" id="card-q4">
+        <span class="card-number">Q4</span>
+        <div class="card-icon">⚓</div>
+        <h3 class="card-title">Q4 — Simple Django Page</h3>
+        <p class="card-subtitle">A simple webpage rendered using Django's template tooling.</p>
+        <span class="card-tag">Basic Page</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+    </div>
+
+    <!-- Section: Data & CRUD Apps -->
+    <h2 class="section-title">⚔️ Grand Line — Data Adventures</h2>
+    <div class="card-grid">
+
+      <a href="/q6/" class="glass-card card-green" style="--delay: 250ms" id="card-q6">
+        <span class="card-number">Q6</span>
+        <div class="card-icon">🏥</div>
+        <h3 class="card-title">Q6 — Doctor Management</h3>
+        <p class="card-subtitle">Doctor management system with CRUD operations.</p>
+        <span class="card-tag">Doctors CRUD</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="/q7/" class="glass-card card-orange" style="--delay: 350ms" id="card-q7">
+        <span class="card-number">Q7</span>
+        <div class="card-icon">🔧</div>
+        <h3 class="card-title">Q7 — MVT Architecture Demo</h3>
+        <p class="card-subtitle">Demonstrates Django's Model-View-Template architecture.</p>
+        <span class="card-tag">MVT Pattern</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="/q9/" class="glass-card card-blue" style="--delay: 450ms" id="card-q9">
+        <span class="card-number">Q9</span>
+        <div class="card-icon">🗺️</div>
+        <h3 class="card-title">Q9 — Multi-Page Site</h3>
+        <p class="card-subtitle">Multi-page navigation — Home, About, Contact &amp; Services.</p>
+        <span class="card-tag">URL Routing</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="/q11/" class="glass-card card-purple" style="--delay: 550ms" id="card-q11">
+        <span class="card-number">Q11</span>
+        <div class="card-icon">📚</div>
+        <h3 class="card-title">Q11 — Database Connectivity</h3>
+        <p class="card-subtitle">Book database with Django ORM connectivity demo.</p>
+        <span class="card-tag">Database</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="/q12/" class="glass-card card-gold" style="--delay: 650ms" id="card-q12">
+        <span class="card-number">Q12</span>
+        <div class="card-icon">🛒</div>
+        <h3 class="card-title">Q12 — CRUD Operations</h3>
+        <p class="card-subtitle">Full Product CRUD with Django ORM — create, read, update, delete.</p>
+        <span class="card-tag">ORM CRUD</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="/q14/" class="glass-card card-blue" style="--delay: 750ms" id="card-q14">
+        <span class="card-number">Q14</span>
+        <div class="card-icon">📡</div>
+        <h3 class="card-title">Q14 — REST API (AJAX)</h3>
+        <p class="card-subtitle">REST API with AJAX-powered frontend for items management.</p>
+        <span class="card-tag">REST API</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+    </div>
+
+    <!-- Section: Auth & Security -->
+    <h2 class="section-title">🛡️ Impel Down — Auth &amp; Security</h2>
+    <div class="card-grid">
+
+      <a href="/q10/" class="glass-card card-red" style="--delay: 300ms" id="card-q10">
+        <span class="card-number">Q10</span>
+        <div class="card-icon">📝</div>
+        <h3 class="card-title">Q10 — Registration Form</h3>
+        <p class="card-subtitle">User registration form with server-side validation.</p>
+        <span class="card-tag">Registration</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="/q13/" class="glass-card card-purple" style="--delay: 400ms" id="card-q13">
+        <span class="card-number">Q13</span>
+        <div class="card-icon">🔐</div>
+        <h3 class="card-title">Q13 — User Authentication</h3>
+        <p class="card-subtitle">Full user auth — login, register, profile &amp; logout.</p>
+        <span class="card-tag">Authentication</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+    </div>
+
+    <!-- Section: Advanced -->
+    <h2 class="section-title">🌊 New World — Advanced Systems</h2>
+    <div class="card-grid">
+
+      <a href="/q16/" class="glass-card card-gold" style="--delay: 300ms" id="card-q16">
+        <span class="card-number">Q16</span>
+        <div class="card-icon">💳</div>
+        <h3 class="card-title">Q16 — Payment Gateway</h3>
+        <p class="card-subtitle">Paytm Payment Gateway integration for online transactions.</p>
+        <span class="card-tag">Payment</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a href="/q20/" class="glass-card card-green" style="--delay: 400ms" id="card-q20">
+        <span class="card-number">Q20</span>
+        <div class="card-icon">🧿</div>
+        <h3 class="card-title">Q20 — Doctor Map Locator</h3>
+        <p class="card-subtitle">Doctor locator with Google Maps API integration.</p>
+        <span class="card-tag">Google Maps</span>
+        <div class="card-arrow">→</div>
+      </a>
+
+    </div>
+
+    <!-- Admin Section -->
+    <h2 class="section-title">👑 Pirate King — Administration</h2>
+    <div class="admin-row">
+      <a href="/admin/" class="admin-card" id="card-admin">
+        <div class="card-icon">🏛️</div>
+        <div>
+          <h3 class="card-title">Django Admin</h3>
+          <p class="card-subtitle">The throne room — manage all your data with supreme authority.</p>
+          <p class="card-subtitle">for admin login Username-admin password-test@123</p>
+          <p class="card-subtitle">for user login Username-harsh password-Chv1502.</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="pirate-flag">🏴‍☠️</div>
+      <p>Built with 🔥 by <a href="#">Harsh Chauhan</a> — "I'm gonna be the Pirate King!"</p>
+      <p style="margin-top:4px; font-size: 0.75rem;">Django • One Piece Theme • Grand Line Projects</p>
+    </footer>
+
+  </div>
+
+  <!-- Compass Navigation -->
+  <div class="compass" id="compass" title="Back to Top" onclick="window.scrollTo({top:0, behavior:'smooth'})">🧭</div>
+
+  <script>
+    // ═══════════════════════════════════════════
+    // LOADING SCREEN
+    // ═══════════════════════════════════════════
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loader').classList.add('hidden');
+      }, 800);
+    });
+
+    // ═══════════════════════════════════════════
+    // GENERATE STARS
+    // ═══════════════════════════════════════════
+    (function generateStars() {
+      const container = document.getElementById('stars');
+      for (let i = 0; i < 120; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.setProperty('--dur', (2 + Math.random() * 4) + 's');
+        star.style.animationDelay = Math.random() * 5 + 's';
+        star.style.width = star.style.height = (1 + Math.random() * 2) + 'px';
+        container.appendChild(star);
+      }
+    })();
+
+    // ═══════════════════════════════════════════
+    // GENERATE FLOATING PARTICLES (GOLD DUST)
+    // ═══════════════════════════════════════════
+    (function generateParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 25; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = 40 + Math.random() * 60 + '%';
+        p.style.setProperty('--dur', (4 + Math.random() * 8) + 's');
+        p.style.animationDelay = Math.random() * 10 + 's';
+        container.appendChild(p);
+      }
+    })();
+
+    // ═══════════════════════════════════════════
+    // 3D CARD TILT EFFECT (Mouse tracking)
+    // ═══════════════════════════════════════════
+    document.querySelectorAll('.glass-card, .featured-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -8;
+        const rotateY = ((x - centerX) / centerX) * 8;
+
+        card.style.transform = `translateY(-12px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
+
+        // Radial glow follow cursor
+        const mx = (x / rect.width) * 100;
+        const my = (y / rect.height) * 100;
+        card.style.setProperty('--mx', mx + '%');
+        card.style.setProperty('--my', my + '%');
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      });
+    });
+
+    // ═══════════════════════════════════════════
+    // INTERSECTION OBSERVER — Animate on Scroll
+    // ═══════════════════════════════════════════
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animationPlayState = 'running';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.glass-card, .section-title').forEach(el => {
+      el.style.animationPlayState = 'paused';
+      observer.observe(el);
+    });
+
+    // ═══════════════════════════════════════════
+    // COMPASS — Show/Hide on Scroll
+    // ═══════════════════════════════════════════
+    const compass = document.getElementById('compass');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+        compass.style.opacity = '1';
+        compass.style.pointerEvents = 'auto';
+      } else {
+        compass.style.opacity = '0';
+        compass.style.pointerEvents = 'none';
+      }
+    });
+    compass.style.opacity = '0';
+    compass.style.pointerEvents = 'none';
+    compass.style.transition = 'opacity 0.4s, transform 0.3s, box-shadow 0.3s';
+
+    // ═══════════════════════════════════════════
+    // TWEMOJI — Replace native emojis with clean SVGs
+    // ═══════════════════════════════════════════
+    if (typeof twemoji !== 'undefined') {
+      twemoji.parse(document.body, {
+        folder: 'svg',
+        ext: '.svg'
+      });
+    }
+  </script>
+
+</body>
+
+</html>

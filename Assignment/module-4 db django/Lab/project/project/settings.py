@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-984b(iwf(56avu93+9af&!d%r3#ahkd059u-@+w_76r2s$%e+#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'Q14',
     'Q15',
     'Q16',
-    'Q18',
+    'Q17_18_19',
+    'Q20',
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -69,6 +70,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'project.middleware.AppNavigationMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -76,7 +78,7 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'project' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -162,15 +164,15 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
-LOGIN_REDIRECT_URL = '/q18/'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/q18/login/'
+LOGIN_REDIRECT_URL = '/q17_18_19/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/q17_18_19/login/'
 SOCIALACCOUNT_LOGIN_ON_GET = True
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_AUTO_SIGNUP = True
-SOCIALACCOUNT_ADAPTER = 'Q18.adapters.CustomSocialAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'Q17_18_19.adapters.CustomSocialAccountAdapter'
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
