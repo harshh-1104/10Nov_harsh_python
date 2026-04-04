@@ -17,13 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from project.views import home_menu
 from Q1 import views as q1_views
 from Q2 import views as q2_views
 from Q3 import views as q3_views
 from Q4 import views as q4_views
 
 urlpatterns = [
-    path('', q1_views.home, name='home'),
+    path('', home_menu, name='home_menu'),
+    path('q1/', q1_views.home, name='home'),
     path('q2/', q2_views.home, name='q2_home'),
     path('q3/', q3_views.home, name='q3_home'),
     path('q4/', q4_views.home, name='q4_home'),
@@ -36,5 +38,9 @@ urlpatterns = [
     path('q13/', include('Q13.urls')),
     path('q14/', include('Q14.urls')),
     path('q16/', include('Q16.urls')),
+    path('q17_18_19/', include('Q17_18_19.urls')),
+    path('q20/', include('Q20.urls')),
+    path('accounts/', include('allauth.urls')),
     path('admin/', admin.site.urls),
 ]
+

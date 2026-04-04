@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Finder - Google Maps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #6366f1;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--white);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            width: 350px;
+            background: var(--white);
+            box-shadow: 4px 0 6px -1px rgb(0 0 0 / 0.1);
+            overflow-y: auto;
+            padding: 1.5rem;
+            z-index: 5;
+        }
+
+        #map {
+            flex: 1;
+            height: 100%;
+        }
+
+        .doctor-card {
+            background: var(--bg);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .doctor-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            border-color: var(--primary);
+        }
+
+        .doctor-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .doctor-card p {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #eef2ff;
+            color: var(--primary);
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Custom Infowindow Styling */
+        .info-content {
+            padding: 0.5rem;
+        }
+        .info-content h2 { font-size: 1rem; color: var(--primary); }
+        .info-content p { font-size: 0.8rem; margin-top: 0.2rem; }
+
+        .api-warning {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            z-index: 100;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>📍 Doctor Finder</h1>
+        <div style="font-size: 0.9rem; color: #64748b;">Finding the best care near you</div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <h2 style="margin-bottom: 1rem; font-size: 1.25rem;">Available Doctors</h2>
+            <div id="doctor-list">
+                <!-- List populated by JS -->
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <div id="api-warning" class="api-warning">
+        Please replace <strong>YOUR_API_KEY</strong> with a valid Google Maps API Key in the template.
+    </div>
+
+    <script>
+        const doctors = {{ doctors_json|safe }};
+        let map;
+        let markers = [];
+
+        function initMap() {
+            // Default center if no doctors
+            const defaultLocation = { lat: 21.1702, lng: 72.8311 }; // Surat, India
+            
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 12,
+                center: doctors.length > 0 ? { lat: doctors[0].lat, lng: doctors[0].lng } : defaultLocation,
+                mapTypeControl: false,
+                streetViewControl: false,
+                styles: [
+                    {
+                        "featureType": "poi",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{"color": "#747e89"}]
+                    },
+                    {
+                        "featureType": "poi.park",
+                        "elementType": "geometry.fill",
+                        "stylers": [{"color": "#e8f5e9"}]
+                    }
+                ]
+            });
+
+            const infoWindow = new google.maps.InfoWindow();
+
+            doctors.forEach((doctor, index) => {
+                const marker = new google.maps.Marker({
+                    position: { lat: doctor.lat, lng: doctor.lng },
+                    map: map,
+                    title: doctor.name,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: "#4f46e5",
+                        fillOpacity: 1,
+                        strokeWeight: 2,
+                        strokeColor: "#ffffff"
+                    }
+                });
+
+                markers.push(marker);
+
+                marker.addListener("click", () => {
+                    showInfo(doctor, marker);
+                });
+
+                // Add to sidebar
+                addDoctorToList(doctor, index);
+            });
+
+            if (doctors.length === 0) {
+                document.getElementById('doctor-list').innerHTML = '<p style="color:#94a3b8; font-style:italic;">No doctors found. Please add some in the admin panel.</p>';
+            }
+        }
+
+        function showInfo(doctor, marker) {
+            const contentString = `
+                <div class="info-content">
+                    <h2>Dr. ${doctor.name}</h2>
+                    <div class="badge">${doctor.specialty}</div>
+                    <p><strong>📍 Address:</strong> ${doctor.address}</p>
+                    <p><strong>📞 Phone:</strong> ${doctor.phone}</p>
+                </div>
+            `;
+            const infoWindow = new google.maps.InfoWindow({
+                content: contentString
+            });
+            infoWindow.open(map, marker);
+        }
+
+        function addDoctorToList(doctor, index) {
+            const list = document.getElementById('doctor-list');
+            const card = document.createElement('div');
+            card.className = 'doctor-card';
+            card.innerHTML = `
+                <span class="badge">${doctor.specialty}</span>
+                <h3>Dr. ${doctor.name}</h3>
+                <p>📍 ${doctor.address}</p>
+            `;
+            card.onclick = () => {
+                map.setCenter({ lat: doctor.lat, lng: doctor.lng });
+                map.setZoom(15);
+                showInfo(doctor, markers[index]);
+            };
+            list.appendChild(card);
+        }
+
+        // Show warning if API key is placeholder
+        window.addEventListener('load', () => {
+            const scriptTag = document.querySelector('script[src*="maps.googleapis.com"]');
+            if (scriptTag && scriptTag.src.includes('YOUR_API_KEY')) {
+                document.getElementById('api-warning').style.display = 'block';
+            }
+        });
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+</body>
+</html>
