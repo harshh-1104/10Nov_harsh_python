@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Random Joke — Doctor Finder{% endblock %}
+
+{% block content %}
+<a href="{% url 'home' %}" class="back-link">← Back to Dashboard</a>
+
+<div class="page-header">
+    <h1>😂 Random Joke Script</h1>
+    <p>Fetch a random joke from JokeAPI. Click the button to get a fresh joke every time!</p>
+</div>
+
+<div class="content-panel">
+    <h2>📡 API Endpoint</h2>
+    <div class="endpoint-list">
+        <div class="endpoint-item">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/joke/</span>
+        </div>
+    </div>
+</div>
+
+<div class="content-panel">
+    <h2>🎯 Try It</h2>
+    <button class="btn btn-primary" id="jokeBtn" onclick="fetchJoke()">
+        🎲 Get Random Joke
+    </button>
+    <div class="result-box" id="jokeResult" style="margin-top: 1rem;">
+        Click the button above to fetch a joke...
+    </div>
+</div>
+
+<div class="content-panel">
+    <h2>💻 Sample Code</h2>
+    <div class="code-block">
+<span class="comment"># Python script to fetch a random joke</span>
+<span class="cmd">import</span> requests
+
+response = requests.get(<span class="flag">"https://v2.jokeapi.dev/joke/Any?type=single"</span>)
+data = response.json()
+
+<span class="cmd">print</span>(<span class="flag">f"Category: {data['category']}"</span>)
+<span class="cmd">print</span>(<span class="flag">f"Joke: {data['joke']}"</span>)
+    </div>
+</div>
+
+<div class="content-panel">
+    <h2>📮 cURL Request</h2>
+    <div class="code-block">
+<span class="cmd">curl</span> http://127.0.0.1:8000/api/joke/
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function fetchJoke() {
+    const btn = document.getElementById('jokeBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Fetching...';
+    showLoading('jokeResult');
+
+    try {
+        const { data } = await apiFetch('/api/joke/');
+        setResult('jokeResult',
+            `<strong>📂 Category:</strong> ${data.category || 'Fun'}\n\n` +
+            `<strong>😄 Joke:</strong> ${data.joke}`,
+            'success'
+        );
+        showToast('Joke fetched!', 'success');
+    } catch (err) {
+        setResult('jokeResult', '❌ Failed to fetch joke. Try again!', 'error');
+        showToast('Error fetching joke', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🎲 Get Random Joke';
+    }
+}
+</script>
+{% endblock %}

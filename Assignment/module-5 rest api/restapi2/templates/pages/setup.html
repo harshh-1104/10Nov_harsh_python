@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Django Setup — Doctor Finder{% endblock %}
+
+{% block content %}
+<a href="{% url 'home' %}" class="back-link">← Back to Dashboard</a>
+
+<div class="page-header">
+    <h1>⚙️ Django Setup Script</h1>
+    <p>Step-by-step guide to set up this Django REST Framework project from scratch.</p>
+</div>
+
+<!-- Step 1 -->
+<div class="content-panel">
+    <h2>📦 Step 1 — Create Virtual Environment</h2>
+    <div class="code-block">
+<span class="comment"># Create a virtual environment</span>
+<span class="cmd">python</span> -m venv venv
+
+<span class="comment"># Activate it (Windows)</span>
+<span class="cmd">venv\Scripts\activate</span>
+
+<span class="comment"># Activate it (macOS/Linux)</span>
+<span class="cmd">source</span> venv/bin/activate
+    </div>
+</div>
+
+<!-- Step 2 -->
+<div class="content-panel">
+    <h2>📥 Step 2 — Install Packages</h2>
+    <div class="code-block">
+<span class="comment"># Install Django</span>
+<span class="cmd">pip install</span> <span class="flag">django</span>
+
+<span class="comment"># Install Django REST Framework</span>
+<span class="cmd">pip install</span> <span class="flag">djangorestframework</span>
+
+<span class="comment"># Install requests (for external API calls)</span>
+<span class="cmd">pip install</span> <span class="flag">requests</span>
+
+<span class="comment"># Or install all at once</span>
+<span class="cmd">pip install</span> <span class="flag">django djangorestframework requests</span>
+    </div>
+</div>
+
+<!-- Step 3 -->
+<div class="content-panel">
+    <h2>🏗️ Step 3 — Create Django Project</h2>
+    <div class="code-block">
+<span class="comment"># Create the project</span>
+<span class="cmd">django-admin</span> startproject <span class="flag">restapi2</span>
+
+<span class="comment"># Navigate into the project</span>
+<span class="cmd">cd</span> restapi2
+
+<span class="comment"># Create the app</span>
+<span class="cmd">python</span> manage.py startapp <span class="flag">doctor_finder</span>
+    </div>
+</div>
+
+<!-- Step 4 -->
+<div class="content-panel">
+    <h2>📝 Step 4 — Configure settings.py</h2>
+    <div class="code-block">
+<span class="comment"># Add to INSTALLED_APPS in settings.py:</span>
+
+INSTALLED_APPS = [
+    ...
+    <span class="flag">'rest_framework'</span>,           <span class="comment"># Django REST Framework</span>
+    <span class="flag">'rest_framework.authtoken'</span>,  <span class="comment"># Token Authentication</span>
+    <span class="flag">'doctor_finder'</span>,             <span class="comment"># Our app</span>
+]
+
+<span class="comment"># DRF Configuration</span>
+REST_FRAMEWORK = {
+    <span class="flag">'DEFAULT_AUTHENTICATION_CLASSES'</span>: [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    <span class="flag">'DEFAULT_PAGINATION_CLASS'</span>:
+        'rest_framework.pagination.PageNumberPagination',
+    <span class="flag">'PAGE_SIZE'</span>: 5,
+}
+    </div>
+</div>
+
+<!-- Step 5 -->
+<div class="content-panel">
+    <h2>🗄️ Step 5 — Run Migrations</h2>
+    <div class="code-block">
+<span class="comment"># Create migration files</span>
+<span class="cmd">python</span> manage.py makemigrations
+
+<span class="comment"># Apply migrations to SQLite database</span>
+<span class="cmd">python</span> manage.py migrate
+
+<span class="comment"># Create a superuser for admin panel</span>
+<span class="cmd">python</span> manage.py createsuperuser
+
+<span class="comment"># Run the development server</span>
+<span class="cmd">python</span> manage.py runserver
+    </div>
+</div>
+
+<!-- Project Structure -->
+<div class="content-panel">
+    <h2>📂 Project Structure</h2>
+    <div class="code-block">
+restapi2/
+├── manage.py
+├── requirements.txt
+├── db.sqlite3
+├── restapi2/
+│   ├── __init__.py
+│   ├── settings.py        <span class="comment"># Project settings</span>
+│   ├── urls.py             <span class="comment"># Root URL config</span>
+│   └── wsgi.py
+├── doctor_finder/
+│   ├── __init__.py
+│   ├── apps.py             <span class="comment"># App config</span>
+│   ├── models.py           <span class="comment"># Doctor model</span>
+│   ├── serializers.py      <span class="comment"># DRF serializers</span>
+│   ├── views.py            <span class="comment"># API views</span>
+│   ├── template_views.py   <span class="comment"># UI page views</span>
+│   ├── urls.py             <span class="comment"># App URL routing</span>
+│   └── admin.py            <span class="comment"># Admin config</span>
+├── templates/
+│   ├── base.html           <span class="comment"># Base template</span>
+│   ├── home.html           <span class="comment"># Dashboard</span>
+│   └── pages/              <span class="comment"># Feature pages</span>
+└── static/
+    └── css/
+        └── style.css       <span class="comment"># Styles</span>
+    </div>
+</div>
+
+<div class="content-panel">
+    <h2>📋 requirements.txt</h2>
+    <div class="code-block">
+django>=4.2
+djangorestframework>=3.14
+requests>=2.31
+    </div>
+</div>
+{% endblock %}

@@ -354,7 +354,7 @@ django==4.2.16
 
 
 js url-> localhost url
-auth url->google/login/callback
+auth url->/accounts/google/login/callback/
 
 
 

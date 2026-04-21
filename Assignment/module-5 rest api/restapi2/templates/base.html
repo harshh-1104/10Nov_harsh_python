@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Doctor Finder REST API — Django REST Framework Assignment Dashboard">
+    <title>{% block title %}Doctor Finder API{% endblock %}</title>
+
+    <!-- Google Fonts — Nunito + Fredoka for that cartoon look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- ✨ FLOATING DECORATIVE SHAPES (background blobs) ✨ -->
+    <div class="deco-shapes">
+        <div class="deco-shape"></div>
+        <div class="deco-shape"></div>
+        <div class="deco-shape"></div>
+        <div class="deco-shape"></div>
+    </div>
+
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="navbar" id="main-navbar">
+        <a href="{% url 'home' %}" class="nav-brand">
+            <span class="brand-icon">🩺</span>
+            <span>Doctor Finder</span>
+        </a>
+
+        <button class="nav-hamburger" id="navToggle" onclick="toggleNav()" aria-label="Toggle menu">☰</button>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">🏠 Dashboard</a></li>
+            <li><a href="{% url 'doctors_page' %}" class="{% if request.resolver_match.url_name == 'doctors_page' %}active{% endif %}">👨‍⚕️ Doctors</a></li>
+            <li><a href="{% url 'auth_page' %}" class="{% if request.resolver_match.url_name == 'auth_page' %}active{% endif %}">🔐 Auth</a></li>
+            <li><a href="/api/doctors/" target="_blank">📡 API ↗</a></li>
+            <li><a href="/admin/" target="_blank">⚙️ Admin ↗</a></li>
+        </ul>
+    </nav>
+
+    <!-- ═══ TOAST CONTAINER ═══ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer">
+        <p>🩺 Doctor Finder REST API &middot; Built with Django + DRF &middot; Module 5 Assignment</p>
+        <p style="margin-top: 6px;">Made with ❤️ using Python, Django REST Framework &amp; SQLite</p>
+    </footer>
+
+    <!-- ═══ GLOBAL SCRIPTS ═══ -->
+    <script>
+        // ── Mobile Nav Toggle ──
+        function toggleNav() {
+            document.getElementById('navLinks').classList.toggle('open');
+        }
+
+        // ── Toast Notification System (bouncy!) ──
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            // Add emoji based on type
+            const emojis = { success: '✅', error: '❌', info: 'ℹ️' };
+            toast.textContent = `${emojis[type] || '💬'} ${message}`;
+
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ── Generic Fetch Helper ──
+        async function apiFetch(url, options = {}) {
+            const defaults = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+            };
+            const merged = { ...defaults, ...options };
+            if (options.headers) {
+                merged.headers = { ...defaults.headers, ...options.headers };
+            }
+            const response = await fetch(url, merged);
+            const data = await response.json();
+            return { response, data };
+        }
+
+        // ── Get CSRF Cookie ──
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // ── Loading Helpers ──
+        function showLoading(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) el.innerHTML = '<div class="loading-overlay"><div class="spinner active"></div><span>Loading...</span></div>';
+        }
+
+        function setResult(elementId, content, type = '') {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.className = `result-box ${type}`;
+                el.innerHTML = content;
+            }
+        }
+
+        // ── Close mobile nav when clicking a link ──
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navLinks').classList.remove('open');
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

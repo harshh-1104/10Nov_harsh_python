@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}OTP Verification — Doctor Finder{% endblock %}
+
+{% block content %}
+<a href="{% url 'home' %}" class="back-link">← Back to Dashboard</a>
+
+<div class="page-header">
+    <h1>🔑 Google Login + OTP Verification</h1>
+    <p>Mock OTP verification system. Generate a 6-digit code and verify it. In production, integrate Google OAuth and real SMS/email OTP.</p>
+</div>
+
+<!-- ═══ REQUEST OTP ═══ -->
+<div class="content-panel">
+    <h2>📨 Step 1 — Request OTP</h2>
+    <form onsubmit="requestOTP(event)">
+        <div class="form-group">
+            <label for="otpEmail">Email Address</label>
+            <input type="email" class="form-control" id="otpEmail" placeholder="e.g. user@example.com" required>
+        </div>
+        <button type="submit" class="btn btn-primary" id="otpRequestBtn">📩 Send OTP</button>
+    </form>
+    <div class="result-box" id="otpRequestResult" style="margin-top: 1rem;">
+        Enter your email to receive a 6-digit OTP code...
+    </div>
+</div>
+
+<!-- ═══ VERIFY OTP ═══ -->
+<div class="content-panel">
+    <h2>✅ Step 2 — Verify OTP</h2>
+    <form onsubmit="verifyOTP(event)">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="verifyEmail">Email</label>
+                <input type="email" class="form-control" id="verifyEmail" placeholder="Same email as above" required>
+            </div>
+            <div class="form-group">
+                <label for="otpCode">OTP Code</label>
+                <input type="text" class="form-control" id="otpCode" placeholder="6-digit code" maxlength="6" required>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success" id="otpVerifyBtn">✓ Verify OTP</button>
+    </form>
+    <div class="result-box" id="otpVerifyResult" style="margin-top: 1rem;">
+        Enter the OTP code you received to verify...
+    </div>
+</div>
+
+<!-- ═══ GOOGLE LOGIN INFO ═══ -->
+<div class="content-panel">
+    <h2>🔐 Google OAuth (Info)</h2>
+    <div class="result-box info">
+        <strong>Google Login Setup (Production):</strong>
+
+        1. Go to Google Cloud Console → APIs & Services → Credentials
+        2. Create OAuth 2.0 Client ID
+        3. Set Authorized redirect URI: http://localhost:8000/auth/google/callback/
+        4. Install: pip install django-allauth
+        5. Add to settings.py:
+           - GOOGLE_CLIENT_ID = 'your-client-id'
+           - GOOGLE_CLIENT_SECRET = 'your-client-secret'
+        6. Configure django-allauth for Google provider
+
+        ⚠️ This demo uses mock OTP. Set your Google credentials in .env for real OAuth.
+    </div>
+</div>
+
+<div class="content-panel">
+    <h2>📮 cURL Examples</h2>
+    <div class="code-block">
+<span class="comment"># Request OTP</span>
+<span class="cmd">curl</span> -X POST http://127.0.0.1:8000/api/otp/request/ \
+  -H <span class="flag">"Content-Type: application/json"</span> \
+  -d <span class="flag">'{"email": "user@example.com"}'</span>
+
+<span class="comment"># Verify OTP</span>
+<span class="cmd">curl</span> -X POST http://127.0.0.1:8000/api/otp/verify/ \
+  -H <span class="flag">"Content-Type: application/json"</span> \
+  -d <span class="flag">'{"email": "user@example.com", "otp_code": "123456"}'</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Request OTP ──
+async function requestOTP(e) {
+    e.preventDefault();
+    const btn = document.getElementById('otpRequestBtn');
+    btn.disabled = true;
+    showLoading('otpRequestResult');
+
+    const email = document.getElementById('otpEmail').value;
+
+    try {
+        const { response, data } = await apiFetch('/api/otp/request/', {
+            method: 'POST',
+            body: JSON.stringify({ email }),
+        });
+        if (response.ok) {
+            // Auto-fill verification fields
+            document.getElementById('verifyEmail').value = email;
+            document.getElementById('otpCode').value = data.otp_code;
+            setResult('otpRequestResult',
+                `✅ ${data.message}\n\n🔢 OTP Code: ${data.otp_code}\n\n(In production this would be sent via email/SMS)`,
+                'success'
+            );
+            showToast('OTP generated!', 'success');
+        } else {
+            setResult('otpRequestResult', '❌ ' + JSON.stringify(data), 'error');
+        }
+    } catch (err) {
+        setResult('otpRequestResult', '❌ Error requesting OTP', 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ── Verify OTP ──
+async function verifyOTP(e) {
+    e.preventDefault();
+    const btn = document.getElementById('otpVerifyBtn');
+    btn.disabled = true;
+    showLoading('otpVerifyResult');
+
+    const payload = {
+        email: document.getElementById('verifyEmail').value,
+        otp_code: document.getElementById('otpCode').value,
+    };
+
+    try {
+        const { response, data } = await apiFetch('/api/otp/verify/', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        });
+        if (response.ok) {
+            setResult('otpVerifyResult', `✅ ${data.message}`, 'success');
+            showToast('OTP verified!', 'success');
+        } else {
+            setResult('otpVerifyResult', `❌ ${data.error || 'Verification failed'}`, 'error');
+            showToast('Invalid OTP', 'error');
+        }
+    } catch (err) {
+        setResult('otpVerifyResult', '❌ Error verifying OTP', 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+</script>
+{% endblock %}

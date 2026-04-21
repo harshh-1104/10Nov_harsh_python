@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}GitHub API — Doctor Finder{% endblock %}
+
+{% block content %}
+<a href="{% url 'home' %}" class="back-link">← Back to Dashboard</a>
+
+<div class="page-header">
+    <h1>🐙 GitHub API Integration</h1>
+    <p>List public repositories for any GitHub user. Shows repo name, description, stars, and language.</p>
+</div>
+
+<div class="content-panel">
+    <h2>🔍 Search GitHub User</h2>
+    <form onsubmit="fetchRepos(event)">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="githubUser">GitHub Username</label>
+                <input type="text" class="form-control" id="githubUser" placeholder="e.g. octocat" value="octocat">
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button type="submit" class="btn btn-primary" id="ghBtn" style="width: 100%;">🔍 Fetch Repos</button>
+            </div>
+        </div>
+    </form>
+
+    <div id="repoResults" style="margin-top: 1rem;"></div>
+</div>
+
+<div class="content-panel">
+    <h2>📮 cURL Example</h2>
+    <div class="code-block">
+<span class="cmd">curl</span> <span class="flag">"http://127.0.0.1:8000/api/github/?username=octocat"</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function fetchRepos(e) {
+    e.preventDefault();
+    const username = document.getElementById('githubUser').value.trim();
+    if (!username) return;
+
+    const btn = document.getElementById('ghBtn');
+    btn.disabled = true;
+    document.getElementById('repoResults').innerHTML = '<div class="loading-overlay"><div class="spinner active"></div><span>Fetching repos...</span></div>';
+
+    try {
+        const { data } = await apiFetch(`/api/github/?username=${encodeURIComponent(username)}`);
+        if (data.error) {
+            document.getElementById('repoResults').innerHTML = `<div class="result-box error">❌ ${data.error}</div>`;
+            showToast('User not found', 'error');
+        } else {
+            let html = `<div class="result-box success" style="margin-bottom: 1rem;">📦 Found <strong>${data.repo_count}</strong> repositories for <strong>${data.username}</strong></div>`;
+            html += data.repositories.map(r => `
+                <div class="repo-card">
+                    <h4><a href="${r.url}" target="_blank">${r.name}</a></h4>
+                    <p>${r.description || 'No description'}</p>
+                    <div class="repo-meta">
+                        <span>⭐ ${r.stars}</span>
+                        <span>💻 ${r.language}</span>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('repoResults').innerHTML = html;
+            showToast(`${data.repo_count} repos loaded!`, 'success');
+        }
+    } catch (err) {
+        document.getElementById('repoResults').innerHTML = '<div class="result-box error">❌ Failed to fetch repos.</div>';
+    } finally {
+        btn.disabled = false;
+    }
+}
+</script>
+{% endblock %}

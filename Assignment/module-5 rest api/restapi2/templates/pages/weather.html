@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Weather API — Doctor Finder{% endblock %}
+
+{% block content %}
+<a href="{% url 'home' %}" class="back-link">← Back to Dashboard</a>
+
+<div class="page-header">
+    <h1>🌤️ Weather API</h1>
+    <p>Fetch real-time weather data using the OpenWeatherMap API. Enter a city name to get current conditions.</p>
+</div>
+
+<div class="content-panel">
+    <h2>🔍 Search Weather</h2>
+    <form onsubmit="fetchWeather(event)">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="cityInput">City Name</label>
+                <input type="text" class="form-control" id="cityInput" placeholder="e.g. London, Mumbai, New York" value="London">
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button type="submit" class="btn btn-primary" id="weatherBtn" style="width: 100%;">🌍 Get Weather</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="result-box" id="weatherResult" style="margin-top: 1rem;">
+        Enter a city and click "Get Weather" to fetch data...
+    </div>
+</div>
+
+<div class="content-panel">
+    <h2>📡 API Endpoint</h2>
+    <div class="endpoint-list">
+        <div class="endpoint-item">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/weather/?city=London</span>
+        </div>
+    </div>
+</div>
+
+<div class="content-panel">
+    <h2>📮 cURL Example</h2>
+    <div class="code-block">
+<span class="cmd">curl</span> <span class="flag">"http://127.0.0.1:8000/api/weather/?city=Mumbai"</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function fetchWeather(e) {
+    e.preventDefault();
+    const city = document.getElementById('cityInput').value.trim();
+    if (!city) return;
+
+    const btn = document.getElementById('weatherBtn');
+    btn.disabled = true;
+    showLoading('weatherResult');
+
+    try {
+        const { data } = await apiFetch(`/api/weather/?city=${encodeURIComponent(city)}`);
+        if (data.error) {
+            setResult('weatherResult', `❌ ${data.error}`, 'error');
+            showToast('City not found', 'error');
+        } else {
+            const mockNote = data.mock ? '\n\n⚠️ Mock data — set OPENWEATHERMAP_API_KEY for real weather.' : '';
+            setResult('weatherResult',
+                `🏙️ <strong>${data.city}</strong>\n\n` +
+                `🌡️ Temperature: <strong>${data.temperature}</strong>\n` +
+                `☁️ Conditions: ${data.description}\n` +
+                `💧 Humidity: ${data.humidity}\n` +
+                (data.wind_speed ? `💨 Wind: ${data.wind_speed}` : '') +
+                mockNote,
+                'success'
+            );
+            showToast(`Weather for ${data.city} loaded!`, 'success');
+        }
+    } catch (err) {
+        setResult('weatherResult', '❌ Failed to fetch weather data.', 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+</script>
+{% endblock %}

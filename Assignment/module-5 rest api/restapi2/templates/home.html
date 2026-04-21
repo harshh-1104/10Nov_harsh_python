@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Finder — Dashboard{% endblock %}
+
+{% block content %}
+<!-- ═══ HERO ═══ -->
+<section class="hero fade-in">
+    <h1><span class="hero-emoji">🩺</span> Doctor Finder REST API</h1>
+    <p>Your super-fun Django REST Framework dashboard! Explore each feature below — every card links to a working API and interactive UI page. Let's go! 🚀</p>
+</section>
+
+<!-- ═══ STATS ═══ -->
+<div class="stats-row fade-in">
+    <div class="stat-card">
+        <span class="stat-number" id="statDoctors">{{ stats.total_doctors }}</span>
+        <span class="stat-label">👨‍⚕️ Doctors</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number" id="statSpecialties">{{ stats.total_specialties }}</span>
+        <span class="stat-label">🏥 Specialties</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number">14</span>
+        <span class="stat-label">📡 Endpoints</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number pulse" style="color: var(--candy-green);">●</span>
+        <span class="stat-label">🟢 Server Live</span>
+    </div>
+</div>
+
+<!-- ═══ ASSIGNMENT CARDS ═══ -->
+<div class="section-title">
+    <span>📋 Assignment Features</span>
+    <span class="title-line"></span>
+</div>
+
+<div class="card-grid">
+
+    <!-- 1. Random Joke -->
+    <div class="assignment-card">
+        <span class="card-number">01</span>
+        <div class="card-icon">😂</div>
+        <h3>Random Joke Script</h3>
+        <p>Fetch a random joke from an external API and display it. Uses the JokeAPI for fresh humor every time!</p>
+        <a href="{% url 'joke_page' %}" class="card-btn">
+            View Demo <span class="arrow">→</span>
+        </a>
+    </div>
+
+    <!-- 2. Django Setup -->
+    <div class="assignment-card">
+        <span class="card-number">02</span>
+        <div class="card-icon">⚙️</div>
+        <h3>Django Setup Script</h3>
+        <p>Installation guide for Django, DRF, and required packages. Shows the exact commands to set up this project.</p>
+        <a href="{% url 'setup_page' %}" class="card-btn">
+            View Guide <span class="arrow">→</span>
+        </a>
+    </div>
+
+    <!-- 3-6. Doctor CRUD -->
+    <div class="assignment-card">
+        <span class="card-number">03-06</span>
+        <div class="card-icon">👨‍⚕️</div>
+        <h3>Doctor CRUD API</h3>
+        <p>Complete Create, Read, Update, Delete operations for doctors. Includes model, serializer, class-based views, and URL routing.</p>
+        <a href="{% url 'doctors_page' %}" class="card-btn">
+            Manage Doctors <span class="arrow">→</span>
+        </a>
+    </div>
+
+    <!-- 7. Pagination -->
+    <div class="assignment-card">
+        <span class="card-number">07</span>
+        <div class="card-icon">📄</div>
+        <h3>Pagination</h3>
+        <p>Paginated doctor list API with 5 records per page. Supports page navigation with next/previous links.</p>
+        <a href="/api/doctors/" target="_blank" class="card-btn">
+            View API <span class="arrow">→</span>
+        </a>
+    </div>
+
+    <!-- 8-9. SQLite & App Setup -->
+    <div class="assignment-card">
+        <span class="card-number">08-09</span>
+        <div class="card-icon">🗄️</div>
+        <h3>SQLite + App Setup</h3>
+        <p>SQLite database integration with the doctor_finder app. Models, serializers, and views organized in clean structure.</p>
+        <a href="{% url 'setup_page' %}" class="card-btn">
+            View Structure <span class="arrow">→</span>
+        </a>
+    </div>
+
+    <!-- 10. Google Login + OTP -->
+    <div class="assignment-card">
+        <span class="card-number">10</span>
+        <div class="card-icon">🔑</div>
+        <h3>Google Login + OTP</h3>
+        <p>Mock Google OAuth flow and OTP-based email verification. Generate and verify 6-digit OTP codes.</p>
+        <a href="{% url 'otp_page' %}" class="card-btn">
+            Try OTP <span class="arrow">→</span>
+        </a>
+    </div>
+
+    <!-- 13. Token Authentication -->
+    <div class="assignment-card">
+        <span class="card-number">13</span>
+        <div class="card-icon">🔐</div>
+        <h3>Token Authentication</h3>
+        <p>Register, login, and access protected endpoints using DRF Token Authentication. Restricts API access to authenticated users.</p>
+        <a href="{% url 'auth_page' %}" class="card-btn">
+            Try Auth <span class="arrow">→</span>
+        </a>
+    </div>
+
+    <!-- 14. Weather API -->
+    <div class="assignment-card">
+        <span class="card-number">14</span>
+        <div class="card-icon">🌤️</div>
+        <h3>Weather API</h3>
+        <p>Fetch real-time weather data using OpenWeatherMap API. Search by city name to get temperature, humidity, and conditions.</p>
+        <a href="{% url 'weather_page' %}" class="card-btn">
+            Check Weather <span class="arrow">→</span>
+        </a>
+    </div>
+
+    <!-- 16. GitHub API -->
+    <div class="assignment-card">
+        <span class="card-number">16</span>
+        <div class="card-icon">🐙</div>
+        <h3>GitHub API Integration</h3>
+        <p>List public repositories for any GitHub user. Shows repo name, description, stars, and language.</p>
+        <a href="{% url 'github_page' %}" class="card-btn">
+            Explore Repos <span class="arrow">→</span>
+        </a>
+    </div>
+
+    <!-- 18. Country Info -->
+    <div class="assignment-card">
+        <span class="card-number">18</span>
+        <div class="card-icon">🌍</div>
+        <h3>Country Info API</h3>
+        <p>Fetch country data — population, languages, currencies, and flag. Uses the REST Countries API.</p>
+        <a href="{% url 'country_page' %}" class="card-btn">
+            Search Countries <span class="arrow">→</span>
+        </a>
+    </div>
+
+
+
+    <!-- Full API Docs -->
+    <div class="assignment-card">
+        <span class="card-number">★</span>
+        <div class="card-icon">📚</div>
+        <h3>Full API Documentation</h3>
+        <p>Browse all REST endpoints in DRF's built-in browsable API. Test requests directly from the browser.</p>
+        <a href="/api/doctors/" target="_blank" class="card-btn">
+            Browse API <span class="arrow">→</span>
+        </a>
+    </div>
+
+</div>
+
+<!-- ═══ API ENDPOINTS REFERENCE ═══ -->
+<div class="section-title">
+    <span>🔗 API Endpoints</span>
+    <span class="title-line"></span>
+</div>
+
+<div class="content-panel fade-in">
+    <ul class="endpoint-list">
+        <li class="endpoint-item">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/doctors/</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— List all doctors (paginated)</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/api/doctors/</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— Create a new doctor</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/doctors/&lt;id&gt;/</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— Retrieve doctor details</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge put">PUT</span>
+            <span class="endpoint-path">/api/doctors/&lt;id&gt;/</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— Update a doctor</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge delete">DEL</span>
+            <span class="endpoint-path">/api/doctors/&lt;id&gt;/</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— Delete a doctor</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/api/register/</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— Register new user</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/api/login/</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— Login & get token</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/protected/</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— Protected endpoint (requires token)</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/joke/</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— Random joke</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/weather/?city=London</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— Weather data</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/github/?username=octocat</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— GitHub repos</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/country/?name=India</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— Country info</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/api/otp/request/</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— Request OTP</span>
+        </li>
+        <li class="endpoint-item">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/api/otp/verify/</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">— Verify OTP</span>
+        </li>
+
+    </ul>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Fetch live stats from the API
+    fetch('/api/stats/')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('statDoctors').textContent = data.total_doctors || 0;
+            document.getElementById('statSpecialties').textContent = data.total_specialties || 0;
+        })
+        .catch(() => {});
+</script>
+{% endblock %}

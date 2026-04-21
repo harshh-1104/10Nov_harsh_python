@@ -14,9 +14,12 @@ def setup_google():
     secret = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "YOUR_GOOGLE_OAUTH_CLIENT_SECRET")
     
     # 1. Update Site domain
+    print("For PythonAnywhere, your domain is usually 'yourusername.pythonanywhere.com'")
+    domain_input = input("Enter your domain (press Enter to use 127.0.0.1:8000 for local): ").strip()
+    domain = domain_input if domain_input else "127.0.0.1:8000"
     site = Site.objects.get_or_create(id=1)[0]
-    site.domain = '127.0.0.1:8000'
-    site.name = '127.0.0.1:8000'
+    site.domain = domain
+    site.name = domain
     site.save()
     print(f"Site configured: {site.domain}")
 

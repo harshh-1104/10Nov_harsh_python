@@ -9,13 +9,15 @@ from django.contrib.sites.models import Site
 from allauth.socialaccount.models import SocialApp
 
 def init_google_auth():
-    # 1. Update Site name/domain if necessary (default is example.com)
+    # 1. Update Site domain
+    print("For PythonAnywhere, your domain is usually 'yourusername.pythonanywhere.com'")
+    domain_input = input("Enter your domain (press Enter to use 127.0.0.1:8000 for local): ").strip()
+    domain = domain_input if domain_input else "127.0.0.1:8000"
     site = Site.objects.get_or_create(id=1)[0]
-    site.domain = '127.0.0.1:8000'
-    site.name = 'Finance Tracker'
+    site.domain = domain
+    site.name = domain
     site.save()
-    
-    print(f"Updated Site: {site.domain}")
+    print(f"Site configured: {site.domain}")
 
     # 2. Create SocialApp for Google
     client_id = input("Enter your Google Client ID: ").strip()

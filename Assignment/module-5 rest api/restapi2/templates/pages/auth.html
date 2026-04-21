@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}Token Auth — Doctor Finder{% endblock %}
+
+{% block content %}
+<a href="{% url 'home' %}" class="back-link">← Back to Dashboard</a>
+
+<div class="page-header">
+    <h1>🔐 Token Authentication</h1>
+    <p>Register a user, login to get a token, then access protected endpoints. Demonstrates DRF Token Authentication.</p>
+</div>
+
+<!-- ═══ REGISTER ═══ -->
+<div class="content-panel">
+    <h2>📝 Register New User</h2>
+    <form onsubmit="registerUser(event)">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="regUsername">Username</label>
+                <input type="text" class="form-control" id="regUsername" placeholder="e.g. harsh123" required>
+            </div>
+            <div class="form-group">
+                <label for="regEmail">Email</label>
+                <input type="email" class="form-control" id="regEmail" placeholder="e.g. harsh@email.com">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="regPassword">Password</label>
+            <input type="password" class="form-control" id="regPassword" placeholder="Min 6 characters" required minlength="6">
+        </div>
+        <button type="submit" class="btn btn-success">🚀 Register</button>
+    </form>
+    <div class="result-box" id="registerResult" style="margin-top: 1rem;">Register to get an authentication token...</div>
+</div>
+
+<!-- ═══ LOGIN ═══ -->
+<div class="content-panel">
+    <h2>🔑 Login</h2>
+    <form onsubmit="loginUser(event)">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="loginUsername">Username</label>
+                <input type="text" class="form-control" id="loginUsername" placeholder="Your username" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" class="form-control" id="loginPassword" placeholder="Your password" required>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">🔓 Login</button>
+    </form>
+    <div class="result-box" id="loginResult" style="margin-top: 1rem;">Login to receive your token...</div>
+</div>
+
+<!-- ═══ PROTECTED ENDPOINT ═══ -->
+<div class="content-panel">
+    <h2>🛡️ Access Protected Endpoint</h2>
+    <div class="form-group">
+        <label for="authToken">Auth Token</label>
+        <input type="text" class="form-control" id="authToken" placeholder="Paste your token here...">
+    </div>
+    <button class="btn btn-primary" onclick="accessProtected()">🔒 Access /api/protected/</button>
+    <div class="result-box" id="protectedResult" style="margin-top: 1rem;">Enter a token and hit the button to test access...</div>
+</div>
+
+<!-- ═══ CURL EXAMPLES ═══ -->
+<div class="content-panel">
+    <h2>📮 cURL Examples</h2>
+    <div class="code-block">
+<span class="comment"># Register</span>
+<span class="cmd">curl</span> -X POST http://127.0.0.1:8000/api/register/ \
+  -H <span class="flag">"Content-Type: application/json"</span> \
+  -d <span class="flag">'{"username": "harsh123", "email": "harsh@email.com", "password": "mypassword"}'</span>
+
+<span class="comment"># Login</span>
+<span class="cmd">curl</span> -X POST http://127.0.0.1:8000/api/login/ \
+  -H <span class="flag">"Content-Type: application/json"</span> \
+  -d <span class="flag">'{"username": "harsh123", "password": "mypassword"}'</span>
+
+<span class="comment"># Access protected endpoint with token</span>
+<span class="cmd">curl</span> http://127.0.0.1:8000/api/protected/ \
+  -H <span class="flag">"Authorization: Token YOUR_TOKEN_HERE"</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Register ──
+async function registerUser(e) {
+    e.preventDefault();
+    showLoading('registerResult');
+
+    const payload = {
+        username: document.getElementById('regUsername').value,
+        email: document.getElementById('regEmail').value,
+        password: document.getElementById('regPassword').value,
+    };
+
+    try {
+        const { response, data } = await apiFetch('/api/register/', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        });
+        if (response.ok) {
+            document.getElementById('authToken').value = data.token;
+            setResult('registerResult',
+                `✅ Registration successful!\n\n` +
+                `👤 Username: ${data.user.username}\n` +
+                `📧 Email: ${data.user.email}\n` +
+                `🔑 Token: ${data.token}`,
+                'success'
+            );
+            showToast('User registered!', 'success');
+        } else {
+            setResult('registerResult', '❌ ' + JSON.stringify(data), 'error');
+            showToast('Registration failed', 'error');
+        }
+    } catch (err) {
+        setResult('registerResult', '❌ Error: ' + err.message, 'error');
+    }
+}
+
+// ── Login ──
+async function loginUser(e) {
+    e.preventDefault();
+    showLoading('loginResult');
+
+    const payload = {
+        username: document.getElementById('loginUsername').value,
+        password: document.getElementById('loginPassword').value,
+    };
+
+    try {
+        const { response, data } = await apiFetch('/api/login/', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        });
+        if (response.ok) {
+            document.getElementById('authToken').value = data.token;
+            setResult('loginResult',
+                `✅ Login successful!\n\n` +
+                `👤 User: ${data.user.username}\n` +
+                `🔑 Token: ${data.token}`,
+                'success'
+            );
+            showToast('Logged in!', 'success');
+        } else {
+            setResult('loginResult', '❌ ' + (data.error || JSON.stringify(data)), 'error');
+            showToast('Login failed', 'error');
+        }
+    } catch (err) {
+        setResult('loginResult', '❌ Error: ' + err.message, 'error');
+    }
+}
+
+// ── Protected ──
+async function accessProtected() {
+    const token = document.getElementById('authToken').value.trim();
+    if (!token) {
+        setResult('protectedResult', '⚠️ Please enter or get a token first!', 'error');
+        return;
+    }
+
+    showLoading('protectedResult');
+
+    try {
+        const { response, data } = await apiFetch('/api/protected/', {
+            headers: { 'Authorization': `Token ${token}` },
+        });
+        if (response.ok) {
+            setResult('protectedResult',
+                `✅ ${data.message}\n\n👤 User ID: ${data.user_id}`,
+                'success'
+            );
+            showToast('Access granted!', 'success');
+        } else {
+            setResult('protectedResult', '🔒 Access denied! Invalid or missing token.', 'error');
+            showToast('Access denied', 'error');
+        }
+    } catch (err) {
+        setResult('protectedResult', '❌ Error: ' + err.message, 'error');
+    }
+}
+</script>
+{% endblock %}

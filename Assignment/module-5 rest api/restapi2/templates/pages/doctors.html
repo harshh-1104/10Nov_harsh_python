@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor CRUD — Doctor Finder{% endblock %}
+
+{% block content %}
+<a href="{% url 'home' %}" class="back-link">← Back to Dashboard</a>
+
+<div class="page-header">
+    <h1>👨‍⚕️ Doctor CRUD API</h1>
+    <p>Full Create, Read, Update, Delete operations. Manage doctors using the interactive forms below or the REST API.</p>
+</div>
+
+<!-- ═══ ADD DOCTOR FORM ═══ -->
+<div class="content-panel">
+    <h2>➕ Add New Doctor</h2>
+    <form id="addDoctorForm" onsubmit="addDoctor(event)">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="doctorName">Doctor Name</label>
+                <input type="text" class="form-control" id="doctorName" placeholder="e.g. John Smith" required>
+            </div>
+            <div class="form-group">
+                <label for="doctorSpecialty">Specialty</label>
+                <select class="form-control" id="doctorSpecialty">
+                    <option value="General">General Medicine</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Dermatology">Dermatology</option>
+                    <option value="Neurology">Neurology</option>
+                    <option value="Orthopedics">Orthopedics</option>
+                    <option value="Pediatrics">Pediatrics</option>
+                    <option value="Psychiatry">Psychiatry</option>
+                    <option value="ENT">ENT</option>
+                    <option value="Ophthalmology">Ophthalmology</option>
+                    <option value="Gynecology">Gynecology</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="doctorContact">Contact Details</label>
+            <input type="text" class="form-control" id="doctorContact" placeholder="e.g. +91-98765-43210 or doctor@email.com" required>
+        </div>
+        <button type="submit" class="btn btn-success" id="addBtn">➕ Add Doctor</button>
+    </form>
+</div>
+
+<!-- ═══ SEARCH ═══ -->
+<div class="content-panel">
+    <h2>🔍 Search Doctors</h2>
+    <div class="form-group">
+        <input type="text" class="form-control" id="searchInput" placeholder="Search by name or specialty..." oninput="searchDoctors()">
+    </div>
+</div>
+
+<!-- ═══ DOCTORS TABLE ═══ -->
+<div class="content-panel">
+    <h2>📋 Doctors List <span id="doctorCount" class="badge badge-purple" style="margin-left: 8px;">0</span></h2>
+    <div style="overflow-x: auto;">
+        <table class="data-table" id="doctorsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Specialty</th>
+                    <th>Contact</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="doctorsBody">
+                <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading doctors...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div style="display: flex; justify-content: center; gap: 8px; margin-top: 1rem;" id="pagination"></div>
+</div>
+
+<!-- ═══ EDIT MODAL (inline) ═══ -->
+<div id="editPanel" class="content-panel" style="display: none; border-color: var(--accent-primary);">
+    <h2>✏️ Edit Doctor</h2>
+    <form id="editDoctorForm" onsubmit="updateDoctor(event)">
+        <input type="hidden" id="editId">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="editName">Name</label>
+                <input type="text" class="form-control" id="editName" required>
+            </div>
+            <div class="form-group">
+                <label for="editSpecialty">Specialty</label>
+                <select class="form-control" id="editSpecialty">
+                    <option value="General">General Medicine</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Dermatology">Dermatology</option>
+                    <option value="Neurology">Neurology</option>
+                    <option value="Orthopedics">Orthopedics</option>
+                    <option value="Pediatrics">Pediatrics</option>
+                    <option value="Psychiatry">Psychiatry</option>
+                    <option value="ENT">ENT</option>
+                    <option value="Ophthalmology">Ophthalmology</option>
+                    <option value="Gynecology">Gynecology</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="editContact">Contact</label>
+            <input type="text" class="form-control" id="editContact" required>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            <button type="button" class="btn btn-outline" onclick="cancelEdit()">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<!-- ═══ API REFERENCE ═══ -->
+<div class="content-panel">
+    <h2>📮 cURL Examples</h2>
+    <div class="code-block">
+<span class="comment"># List all doctors</span>
+<span class="cmd">curl</span> http://127.0.0.1:8000/api/doctors/
+
+<span class="comment"># Create a doctor</span>
+<span class="cmd">curl</span> -X POST http://127.0.0.1:8000/api/doctors/ \
+  -H <span class="flag">"Content-Type: application/json"</span> \
+  -d <span class="flag">'{"name": "John Smith", "specialty": "Cardiology", "contact_details": "john@email.com"}'</span>
+
+<span class="comment"># Update a doctor</span>
+<span class="cmd">curl</span> -X PUT http://127.0.0.1:8000/api/doctors/1/ \
+  -H <span class="flag">"Content-Type: application/json"</span> \
+  -d <span class="flag">'{"name": "John Smith", "specialty": "Neurology", "contact_details": "john@email.com"}'</span>
+
+<span class="comment"># Delete a doctor</span>
+<span class="cmd">curl</span> -X DELETE http://127.0.0.1:8000/api/doctors/1/
+
+<span class="comment"># Search doctors</span>
+<span class="cmd">curl</span> http://127.0.0.1:8000/api/doctors/?search=cardio
+
+<span class="comment"># Paginated (page 2)</span>
+<span class="cmd">curl</span> http://127.0.0.1:8000/api/doctors/?page=2
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPage = '/api/doctors/';
+
+// ── Load doctors on page load ──
+document.addEventListener('DOMContentLoaded', () => loadDoctors());
+
+async function loadDoctors(url = '/api/doctors/') {
+    try {
+        const { data } = await apiFetch(url);
+        const tbody = document.getElementById('doctorsBody');
+        const doctors = data.results || data;
+        const count = data.count || doctors.length;
+
+        document.getElementById('doctorCount').textContent = count;
+
+        if (doctors.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:2rem;">No doctors found. Add one above!</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = doctors.map(d => `
+            <tr>
+                <td>${d.id}</td>
+                <td><strong>Dr. ${d.name}</strong></td>
+                <td><span class="badge badge-purple">${d.specialty}</span></td>
+                <td>${d.contact_details}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline" onclick='editDoctor(${JSON.stringify(d)})'>✏️ Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteDoctor(${d.id})">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+
+        // Pagination
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+        if (data.previous) {
+            pagination.innerHTML += `<button class="btn btn-sm btn-outline" onclick="loadDoctors('${data.previous}')">← Prev</button>`;
+        }
+        if (data.next) {
+            pagination.innerHTML += `<button class="btn btn-sm btn-outline" onclick="loadDoctors('${data.next}')">Next →</button>`;
+        }
+    } catch (err) {
+        showToast('Failed to load doctors', 'error');
+    }
+}
+
+// ── Add Doctor ──
+async function addDoctor(e) {
+    e.preventDefault();
+    const btn = document.getElementById('addBtn');
+    btn.disabled = true;
+
+    const payload = {
+        name: document.getElementById('doctorName').value,
+        specialty: document.getElementById('doctorSpecialty').value,
+        contact_details: document.getElementById('doctorContact').value,
+    };
+
+    try {
+        const { response, data } = await apiFetch('/api/doctors/', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        });
+        if (response.ok) {
+            showToast(`Dr. ${data.name} added successfully!`, 'success');
+            document.getElementById('addDoctorForm').reset();
+            loadDoctors();
+        } else {
+            showToast('Failed to add doctor: ' + JSON.stringify(data), 'error');
+        }
+    } catch (err) {
+        showToast('Error adding doctor', 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ── Edit Doctor ──
+function editDoctor(doctor) {
+    document.getElementById('editPanel').style.display = 'block';
+    document.getElementById('editId').value = doctor.id;
+    document.getElementById('editName').value = doctor.name;
+    document.getElementById('editSpecialty').value = doctor.specialty;
+    document.getElementById('editContact').value = doctor.contact_details;
+    document.getElementById('editPanel').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelEdit() {
+    document.getElementById('editPanel').style.display = 'none';
+}
+
+async function updateDoctor(e) {
+    e.preventDefault();
+    const id = document.getElementById('editId').value;
+    const payload = {
+        name: document.getElementById('editName').value,
+        specialty: document.getElementById('editSpecialty').value,
+        contact_details: document.getElementById('editContact').value,
+    };
+
+    try {
+        const { response, data } = await apiFetch(`/api/doctors/${id}/`, {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+        });
+        if (response.ok) {
+            showToast(`Dr. ${data.name} updated!`, 'success');
+            cancelEdit();
+            loadDoctors();
+        } else {
+            showToast('Update failed', 'error');
+        }
+    } catch (err) {
+        showToast('Error updating doctor', 'error');
+    }
+}
+
+// ── Delete Doctor ──
+async function deleteDoctor(id) {
+    if (!confirm('Are you sure you want to delete this doctor?')) return;
+
+    try {
+        const { response } = await apiFetch(`/api/doctors/${id}/`, { method: 'DELETE' });
+        if (response.ok) {
+            showToast('Doctor deleted!', 'success');
+            loadDoctors();
+        } else {
+            showToast('Delete failed', 'error');
+        }
+    } catch (err) {
+        showToast('Error deleting doctor', 'error');
+    }
+}
+
+// ── Search ──
+let searchTimeout;
+function searchDoctors() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const query = document.getElementById('searchInput').value;
+        loadDoctors(`/api/doctors/?search=${encodeURIComponent(query)}`);
+    }, 300);
+}
+</script>
+{% endblock %}

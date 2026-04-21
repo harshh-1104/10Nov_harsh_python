@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Country Info — Doctor Finder{% endblock %}
+
+{% block content %}
+<a href="{% url 'home' %}" class="back-link">← Back to Dashboard</a>
+
+<div class="page-header">
+    <h1>🌍 Country Info API</h1>
+    <p>Fetch country data — population, languages, currencies, and flag using the REST Countries API.</p>
+</div>
+
+<div class="content-panel">
+    <h2>🔍 Search Country</h2>
+    <form onsubmit="fetchCountry(event)">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="countryInput">Country Name</label>
+                <input type="text" class="form-control" id="countryInput" placeholder="e.g. India, France, Japan" value="India">
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button type="submit" class="btn btn-primary" id="countryBtn" style="width: 100%;">🔍 Get Info</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="result-box" id="countryResult" style="margin-top: 1rem;">
+        Enter a country name and search to get details...
+    </div>
+</div>
+
+<div class="content-panel">
+    <h2>📮 cURL Example</h2>
+    <div class="code-block">
+<span class="cmd">curl</span> <span class="flag">"http://127.0.0.1:8000/api/country/?name=India"</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function fetchCountry(e) {
+    e.preventDefault();
+    const name = document.getElementById('countryInput').value.trim();
+    if (!name) return;
+
+    const btn = document.getElementById('countryBtn');
+    btn.disabled = true;
+    showLoading('countryResult');
+
+    try {
+        const { data } = await apiFetch(`/api/country/?name=${encodeURIComponent(name)}`);
+        if (data.error) {
+            setResult('countryResult', `❌ ${data.error}`, 'error');
+            showToast('Country not found', 'error');
+        } else {
+            let flagHtml = data.flag ? `<img src="${data.flag}" class="country-flag" alt="${data.name} flag">` : '';
+            setResult('countryResult',
+                `🏳️ <strong>${data.name}</strong> (${data.official_name})\n\n` +
+                `🏛️ Capital: <strong>${data.capital}</strong>\n` +
+                `🌍 Region: ${data.region}\n` +
+                `👥 Population: <strong>${data.population}</strong>\n` +
+                `🗣️ Languages: ${data.languages.join(', ')}\n` +
+                `💰 Currencies: ${data.currencies.join(', ')}\n\n` +
+                flagHtml,
+                'success'
+            );
+            showToast(`Info loaded for ${data.name}!`, 'success');
+        }
+    } catch (err) {
+        setResult('countryResult', '❌ Failed to fetch country info.', 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+</script>
+{% endblock %}
